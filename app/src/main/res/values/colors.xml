@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <color name="run_mint">#00F5D4</color>
+    <color name="run_sky">#00BBF9</color>
+    <color name="run_blue">#006FFC</color>
+    <color name="run_indigo">#0022FF</color>
+    <color name="run_navy">#00142F</color>
+
+    <color name="background_light">#F3F8FF</color>
+    <color name="surface_white">#FFFFFF</color>
+    <color name="text_primary">#00142F</color>
+    <color name="text_secondary">#5C6B85</color>
+
+    <color name="chip_public_bg">#E3F7FF</color>
+    <color name="chip_public_text">#006FFC</color>
+    <color name="chip_private_bg">#EDEDF7</color>
+    <color name="chip_private_text">#5C6B85</color>
+
+    <color name="badge_urgent_text">#E8620C</color>
+    <color name="badge_urgent_bg">#FFF1E6</color>
+
+    <color name="bell_circle_bg">#1FFFFFFF</color>
+    <color name="notification_red">#FF4B4B</color>
+</resources>
