@@ -1,26 +1,46 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="#F5F7FA">
 
-    <TextView
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="한강공원 선택"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:padding="16dp" />
+        android:background="@drawable/bg_header_blue"
+        android:paddingTop="20dp"
+        android:paddingBottom="20dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="서울 11개 한강공원 중에서 골라보세요"
-        android:textSize="13sp"
-        android:textColor="#757575"
-        android:paddingHorizontal="16dp"
-        android:paddingBottom="12dp" />
+        <ImageView
+            android:id="@+id/ivBack"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginBottom="10dp"
+            android:src="@android:drawable/ic_menu_revert"
+            app:tint="#FFFFFF" />
+
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="한강공원 선택"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="서울 11개 한강공원 중에서 골라보세요"
+            android:textSize="13sp"
+            android:textColor="#E3F2FD" />
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvParks"
@@ -32,10 +52,20 @@
     <Button
         android:id="@+id/btnConfirm"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:backgroundTint="#2196F3"
+        android:layout_height="52dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="50dp"
         android:textColor="#FFFFFF"
-        android:text="코스 보기" />
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:text="여의도 한강공원 코스 보기"
+        app:backgroundTint="#2196F3"
+        app:cornerRadius="14dp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="16dp" />
 
 </LinearLayout>

@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.android.runmate.R
 import com.android.runmate.data.HanRiverPark
 import com.android.runmate.data.PlaceRepository
+import android.widget.ImageView
 
 class ParkSelectActivity : AppCompatActivity() {
 
@@ -17,6 +18,11 @@ class ParkSelectActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_park_select)
+
+        findViewById<ImageView>(R.id.ivBack).setOnClickListener {
+            finish()
+        }
+
 
         val rv = findViewById<RecyclerView>(R.id.rvParks)
         rv.layoutManager = GridLayoutManager(this, 2)

@@ -36,12 +36,11 @@ class CourseListActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btnCreateMeeting).setOnClickListener {
-            // 팀원의 "모임 만들기" 화면과 연결 (파일명은 팀원 코드에 맞게 수정 필요)
-            val intent = Intent(this, com.android.runmate.ui.home.HomeActivity::class.java)
-            intent.putExtra("location_name", park.name + " 한강공원")
-            intent.putExtra("lat", park.lat)
-            intent.putExtra("lng", park.lng)
-            startActivity(intent)
+//            val intent = Intent(this, com.android.runmate.ui.meeting.CreateMeetingActivity::class.java)
+//            intent.putExtra("location_name", park.name + " 한강공원")
+//            intent.putExtra("lat", park.lat)
+//            intent.putExtra("lng", park.lng)
+//            startActivity(intent)
         }
     }
 }
