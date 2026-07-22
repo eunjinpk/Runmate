@@ -6,7 +6,9 @@ data class HanRiverPark(
     val subInfo: String,
     val lat: Double,
     val lng: Double,
-    val mapImageRes: Int
+    val mapImageRes: Int,
+    val region: String,          // "강북" or "강남"
+    var isFavorite: Boolean = false
 )
 
 data class RunningCourse(

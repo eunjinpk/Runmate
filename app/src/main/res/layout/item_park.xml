@@ -25,6 +25,14 @@
             android:src="@drawable/ic_check_blue_circle"
             android:visibility="gone" />
 
+        <ImageView
+            android:id="@+id/ivFavorite"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:src="@drawable/ic_heart_empty" />
+
         <LinearLayout
             android:id="@+id/nameRow"
             android:orientation="horizontal"
@@ -34,6 +42,7 @@
             android:layout_marginEnd="26dp">
 
             <ImageView
+                android:id="@+id/ivPin"
                 android:layout_width="14dp"
                 android:layout_height="14dp"
                 android:layout_marginEnd="4dp"
@@ -54,6 +63,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@id/nameRow"
+            android:layout_alignParentStart="true"
             android:layout_marginTop="4dp"
             android:textSize="12sp"
             android:textColor="#9E9E9E" />

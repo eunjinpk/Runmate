@@ -24,8 +24,11 @@ class CourseListActivity : AppCompatActivity() {
         val park = PlaceRepository.parks.find { it.id == parkId } ?: PlaceRepository.parks.first()
         val courses = PlaceRepository.getCoursesByPark(parkId)
 
+        findViewById<ImageView>(R.id.ivBack).setOnClickListener { finish() }
+
         findViewById<ImageView>(R.id.ivParkMap).setImageResource(park.mapImageRes)
         findViewById<TextView>(R.id.tvParkTitle).text = park.name + " 한강공원"
+        findViewById<TextView>(R.id.tvCourseCount).text = "레벨에 맞는 추천 코스 ${courses.size}"
 
         selectedCourse = courses.firstOrNull()
 

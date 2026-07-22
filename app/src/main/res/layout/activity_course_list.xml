@@ -1,23 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF">
+    android:background="#EAF2FA">
 
-    <ImageView
-        android:id="@+id/ivParkMap"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:scaleType="centerCrop" />
+        android:layout_height="wrap_content">
 
-    <TextView
-        android:id="@+id/tvParkTitle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:padding="16dp" />
+        <ImageView
+            android:id="@+id/ivParkMap"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:scaleType="centerCrop" />
+
+        <ImageView
+            android:id="@+id/ivBack"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_margin="16dp"
+            android:padding="6dp"
+            android:background="@drawable/bg_circle_white"
+            android:src="@android:drawable/ic_menu_revert"
+            app:tint="#212121" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="150dp"
+            android:background="@drawable/bg_rounded_top_card"
+            android:paddingTop="20dp"
+            android:paddingBottom="16dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:layout_marginEnd="4dp"
+                    android:src="@drawable/ic_location_pin"
+                    app:tint="#2196F3" />
+
+                <TextView
+                    android:id="@+id/tvParkTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:textColor="#212121" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvCourseCount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:textSize="13sp"
+                android:textColor="#757575" />
+        </LinearLayout>
+
+    </FrameLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvCourses"
@@ -29,10 +80,16 @@
     <Button
         android:id="@+id/btnCreateMeeting"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:backgroundTint="#2196F3"
+        android:layout_height="52dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="50dp"
         android:textColor="#FFFFFF"
-        android:text="이 코스로 모임 만들기" />
+        android:textSize="16sp"
+        android:textStyle="bold"
+        android:text="이 코스로 모임 만들기"
+        app:backgroundTint="#2196F3"
+        app:cornerRadius="14dp" />
 
 </LinearLayout>
