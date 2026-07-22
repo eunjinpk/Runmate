@@ -11,22 +11,32 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Runmate">
+
         <activity
             android:name=".ui.home.HomeActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <activity
+            android:name=".ui.place.ParkSelectActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.place.CourseListActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".ui.meeting.CreateMeetingActivity"
             android:exported="false" />
+
         <activity
             android:name=".ui.meeting.MeetingDetailActivity"
             android:exported="false" />
+
     </application>
 
 </manifest>
