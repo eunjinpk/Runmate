@@ -15,6 +15,23 @@ import com.android.runmate.R
 import com.android.runmate.data.DBHelper
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 
+/**
+ * 홈 화면 (#1) - 모집 중인 러닝 모임 리스트
+ *
+ * 시안 기준으로 아래 항목까지 포함:
+ *  - 내 러닝 장소 선택 영역(현재는 표시만, TODO: 장소 화면과 연결)
+ *  - 검색창 (모임명/장소명 검색 → DB LIKE 쿼리로 실제 필터링됨)
+ *  - 지하철역 근처 한강공원 칩 (여의도/반포/뚝섬/잠실) → 클릭 시 해당 장소로 필터링
+ *  - "공개만" 토글 → 클릭 시 공개 모임만 필터링
+ *  - 하단 탭바 (홈/장소/챌린지/랭킹/마이) → 홈 이외 탭은 아직 자리표시자
+ *
+ * 정렬은 기본적으로 날짜/시간이 가까운 순(마감임박순)입니다.
+ *
+ * TODO(다음 단계):
+ *  - fabCreateMeeting 클릭 시 "모임 만들기" 화면(#2)으로 이동
+ *  - 리스트 아이템 클릭 시 "모임 상세" 화면(#3)으로 이동 (meeting.id 전달)
+ *  - 하단 탭바의 장소/챌린지/랭킹/마이 탭에 실제 화면 연결
+ */
 class HomeActivity : AppCompatActivity() {
 
     private lateinit var dbHelper: DBHelper
@@ -57,8 +74,9 @@ class HomeActivity : AppCompatActivity() {
         val fabCreateMeeting = findViewById<ExtendedFloatingActionButton>(R.id.fabCreateMeeting)
 
         adapter = MeetingAdapter { meeting ->
-            // TODO: 모임 상세 화면으로 이동하며 meeting.id 전달
-            Toast.makeText(this, "${meeting.title} 상세 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
+            val intent = android.content.Intent(this, com.android.runmate.ui.meeting.MeetingDetailActivity::class.java)
+            intent.putExtra(com.android.runmate.ui.meeting.MeetingDetailActivity.EXTRA_MEETING_ID, meeting.id)
+            startActivity(intent)
         }
         rvMeetings.layoutManager = LinearLayoutManager(this)
         rvMeetings.adapter = adapter
@@ -81,7 +99,7 @@ class HomeActivity : AppCompatActivity() {
                 if (isPublicOnly) R.drawable.bg_toggle_active else R.drawable.bg_sort_button
             )
             tvPublicOnlyToggle.setTextColor(
-                getColor(if (isPublicOnly) R.color.surface_white else R.color.text_secondary)
+                getColor(if (isPublicOnly) R.color.surface_white else R.color.text_primary)
             )
             refreshList(searchQuery = etSearch.text?.toString())
         }
@@ -96,8 +114,7 @@ class HomeActivity : AppCompatActivity() {
         }
 
         fabCreateMeeting.setOnClickListener {
-            // TODO: 모임 만들기 화면(#2)으로 이동
-            Toast.makeText(this, "모임 만들기 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
+            startActivity(android.content.Intent(this, com.android.runmate.ui.meeting.CreateMeetingActivity::class.java))
         }
 
         setupBottomNav()

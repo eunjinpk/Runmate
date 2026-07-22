@@ -9,7 +9,11 @@ class DBHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "runmate.db"
-        private const val DATABASE_VERSION = 1
+        private const val DATABASE_VERSION = 2 // v2: meetings에 fine_amount, pace 컬럼 추가 (팀 확정)
+
+        // 로그인/회원가입 화면이 아직 없어서, 지금은 항상 이 유저(id=1)로 동작합니다.
+        // 로그인 기능이 붙으면 이 값을 실제 로그인한 유저 id로 바꿔주면 됩니다.
+        const val CURRENT_USER_ID = 1
     }
 
     override fun onCreate(db: SQLiteDatabase) {
@@ -26,6 +30,7 @@ class DBHelper(context: Context) :
         )
 
         // meetings (모임)
+        // v2에서 fine_amount(노쇼 벌금액), pace(목표 페이스) 두 컬럼 추가 (팀 확정)
         db.execSQL(
             """
             CREATE TABLE meetings (
@@ -41,6 +46,8 @@ class DBHelper(context: Context) :
                 is_public INTEGER NOT NULL DEFAULT 1,
                 invite_code TEXT,
                 description TEXT,
+                fine_amount INTEGER NOT NULL DEFAULT 0,
+                pace TEXT,
                 FOREIGN KEY(host_id) REFERENCES users(id)
             )
             """.trimIndent()
@@ -129,9 +136,9 @@ class DBHelper(context: Context) :
         db.execSQL(
             """
             INSERT INTO meetings
-                (host_id, title, date, time, location_name, lat, lng, max_people, is_public, description)
+                (host_id, title, date, time, location_name, lat, lng, max_people, is_public, description, fine_amount, pace)
             VALUES
-                (1, '여의도 저녁 러닝', '2026-07-24', '19:30', '여의도한강공원', 37.5285, 126.9330, 6, 1, '가볍게 5km 뛰어요')
+                (1, '여의도 저녁 러닝', '2026-07-24', '19:30', '여의도한강공원', 37.5285, 126.9330, 6, 1, '가볍게 5km 뛰어요', 3000, '6~7')
             """.trimIndent()
         )
         db.execSQL(
@@ -158,6 +165,12 @@ class DBHelper(context: Context) :
                 (1, '잠실 야경 러닝 8K', '2026-07-25', '20:00', '잠실한강공원', 37.5175, 127.0837, 8, 1, '롯데타워 야경 보며 뛰어요')
             """.trimIndent()
         )
+
+        // 모임 상세 화면 참여자 리스트 확인용 더미 참여자 (미니 유저 2명 + 참여 기록)
+        db.execSQL("INSERT INTO users (id, nickname, level) VALUES (2, '민지', '초보')")
+        db.execSQL("INSERT INTO users (id, nickname, level) VALUES (3, '서연', '초보')")
+        db.execSQL("INSERT INTO meeting_participants (meeting_id, user_id, status) VALUES (1, 2, 'joined')")
+        db.execSQL("INSERT INTO meeting_participants (meeting_id, user_id, status) VALUES (1, 3, 'joined')")
     }
 
     /**
@@ -224,5 +237,161 @@ class DBHelper(context: Context) :
             close()
         }
         return list
+    }
+
+    /**
+     * 모임 만들기(#2) 화면에서 사용. meetings 테이블에 새 모임을 추가하고 새 id를 반환합니다.
+     * 노쇼 벌금액(fine_amount) 컬럼은 현재 확정된 스키마에 없어서 저장하지 않습니다.
+     */
+    fun insertMeeting(
+        hostId: Int,
+        title: String,
+        date: String,
+        time: String,
+        locationName: String,
+        lat: Double?,
+        lng: Double?,
+        maxPeople: Int,
+        isPublic: Boolean,
+        inviteCode: String?,
+        description: String?,
+        fineAmount: Int = 0,
+        pace: String? = null
+    ): Long {
+        val db = writableDatabase
+        val values = android.content.ContentValues().apply {
+            put("host_id", hostId)
+            put("title", title)
+            put("date", date)
+            put("time", time)
+            put("location_name", locationName)
+            if (lat != null) put("lat", lat)
+            if (lng != null) put("lng", lng)
+            put("max_people", maxPeople)
+            put("is_public", if (isPublic) 1 else 0)
+            put("invite_code", inviteCode)
+            put("description", description)
+            put("fine_amount", fineAmount)
+            put("pace", pace)
+        }
+        return db.insert("meetings", null, values)
+    }
+
+    /**
+     * 모임 상세(#3) 화면용: 모임 정보 + 호스트 닉네임을 함께 반환합니다.
+     */
+    fun getMeetingDetail(meetingId: Int): MeetingDetail? {
+        val db = readableDatabase
+        val query = """
+            SELECT m.id, m.host_id, m.title, m.date, m.time, m.location_name, m.description,
+                   m.max_people, m.is_public, m.fine_amount, m.pace,
+                   u.nickname AS host_nickname,
+                   (SELECT COUNT(*) FROM meeting_participants p WHERE p.meeting_id = m.id) AS joined_count
+            FROM meetings m
+            LEFT JOIN users u ON u.id = m.host_id
+            WHERE m.id = ?
+        """.trimIndent()
+
+        val cursor = db.rawQuery(query, arrayOf(meetingId.toString()))
+        var result: MeetingDetail? = null
+        with(cursor) {
+            if (moveToFirst()) {
+                result = MeetingDetail(
+                    id = getInt(getColumnIndexOrThrow("id")),
+                    hostId = getInt(getColumnIndexOrThrow("host_id")),
+                    hostNickname = getString(getColumnIndexOrThrow("host_nickname")) ?: "러너",
+                    title = getString(getColumnIndexOrThrow("title")),
+                    date = getString(getColumnIndexOrThrow("date")),
+                    time = getString(getColumnIndexOrThrow("time")),
+                    locationName = getString(getColumnIndexOrThrow("location_name")),
+                    description = getString(getColumnIndexOrThrow("description")),
+                    maxPeople = getInt(getColumnIndexOrThrow("max_people")),
+                    isPublic = getInt(getColumnIndexOrThrow("is_public")) == 1,
+                    joinedCount = getInt(getColumnIndexOrThrow("joined_count")),
+                    fineAmount = getInt(getColumnIndexOrThrow("fine_amount")),
+                    pace = getString(getColumnIndexOrThrow("pace"))
+                )
+            }
+            close()
+        }
+        return result
+    }
+
+    /**
+     * 모임 상세 화면의 참여자 목록. 참여율은 저장된 컬럼이 아니라
+     * "이 유저가 참여했던 전체 모임 중 no_show가 아닌 비율"로 그때그때 계산합니다.
+     */
+    fun getParticipants(meetingId: Int): List<Participant> {
+        val db = readableDatabase
+        val query = """
+            SELECT u.id AS user_id, u.nickname, u.level
+            FROM meeting_participants p
+            JOIN users u ON u.id = p.user_id
+            WHERE p.meeting_id = ?
+        """.trimIndent()
+
+        val cursor = db.rawQuery(query, arrayOf(meetingId.toString()))
+        val list = mutableListOf<Participant>()
+        with(cursor) {
+            while (moveToNext()) {
+                val userId = getInt(getColumnIndexOrThrow("user_id"))
+                list.add(
+                    Participant(
+                        userId = userId,
+                        nickname = getString(getColumnIndexOrThrow("nickname")),
+                        level = getString(getColumnIndexOrThrow("level")),
+                        participationRate = getParticipationRate(userId)
+                    )
+                )
+            }
+            close()
+        }
+        return list
+    }
+
+    private fun getParticipationRate(userId: Int): Int {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            """
+            SELECT COUNT(*) AS total,
+                   SUM(CASE WHEN status = 'no_show' THEN 0 ELSE 1 END) AS attended
+            FROM meeting_participants
+            WHERE user_id = ?
+            """.trimIndent(),
+            arrayOf(userId.toString())
+        )
+        var rate = 100
+        with(cursor) {
+            if (moveToFirst()) {
+                val total = getInt(getColumnIndexOrThrow("total"))
+                val attended = getInt(getColumnIndexOrThrow("attended"))
+                if (total > 0) rate = (attended * 100) / total
+            }
+            close()
+        }
+        return rate
+    }
+
+    /** 이미 참여 중인지 확인 (참여하기 버튼 상태 결정용) */
+    fun hasUserJoined(meetingId: Int, userId: Int): Boolean {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT id FROM meeting_participants WHERE meeting_id = ? AND user_id = ?",
+            arrayOf(meetingId.toString(), userId.toString())
+        )
+        val joined = cursor.moveToFirst()
+        cursor.close()
+        return joined
+    }
+
+    /** 참여하기 버튼: meeting_participants에 참여 기록 추가 */
+    fun joinMeeting(meetingId: Int, userId: Int) {
+        val db = writableDatabase
+        val values = android.content.ContentValues().apply {
+            put("meeting_id", meetingId)
+            put("user_id", userId)
+            put("status", "joined")
+        }
+        db.insert("meeting_participants", null, values)
     }
 }
