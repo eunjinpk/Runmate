@@ -1,0 +1,47 @@
+package com.android.runmate.ui.place
+
+import android.content.Intent
+import android.os.Bundle
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.android.runmate.R
+import com.android.runmate.data.PlaceRepository
+import com.android.runmate.data.RunningCourse
+
+class CourseListActivity : AppCompatActivity() {
+
+    private var selectedCourse: RunningCourse? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_course_list)
+
+        val parkId = intent.getIntExtra("park_id", 1)
+        val park = PlaceRepository.parks.find { it.id == parkId } ?: PlaceRepository.parks.first()
+        val courses = PlaceRepository.getCoursesByPark(parkId)
+
+        findViewById<ImageView>(R.id.ivParkMap).setImageResource(park.mapImageRes)
+        findViewById<TextView>(R.id.tvParkTitle).text = park.name + " 한강공원"
+
+        selectedCourse = courses.firstOrNull()
+
+        val rv = findViewById<RecyclerView>(R.id.rvCourses)
+        rv.layoutManager = LinearLayoutManager(this)
+        rv.adapter = CourseAdapter(courses) { course ->
+            selectedCourse = course
+        }
+
+        findViewById<Button>(R.id.btnCreateMeeting).setOnClickListener {
+            // 팀원의 "모임 만들기" 화면과 연결 (파일명은 팀원 코드에 맞게 수정 필요)
+            val intent = Intent(this, com.android.runmate.ui.home.HomeActivity::class.java)
+            intent.putExtra("location_name", park.name + " 한강공원")
+            intent.putExtra("lat", park.lat)
+            intent.putExtra("lng", park.lng)
+            startActivity(intent)
+        }
+    }
+}

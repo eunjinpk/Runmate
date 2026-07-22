@@ -20,6 +20,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ui.place.ParkSelectActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.place.CourseListActivity"
+            android:exported="false" />
+
     </application>
 
 </manifest>
