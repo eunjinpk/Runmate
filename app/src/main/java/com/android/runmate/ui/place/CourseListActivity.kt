@@ -36,11 +36,11 @@ class CourseListActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btnCreateMeeting).setOnClickListener {
-//            val intent = Intent(this, com.android.runmate.ui.meeting.CreateMeetingActivity::class.java)
-//            intent.putExtra("location_name", park.name + " 한강공원")
-//            intent.putExtra("lat", park.lat)
-//            intent.putExtra("lng", park.lng)
-//            startActivity(intent)
+            val intent = Intent(this, com.android.runmate.ui.meeting.CreateMeetingActivity::class.java)
+            intent.putExtra("location_name", park.name + " 한강공원")
+            intent.putExtra("lat", park.lat)
+            intent.putExtra("lng", park.lng)
+            startActivity(intent)
         }
     }
 }
