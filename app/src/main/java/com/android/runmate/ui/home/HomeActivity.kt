@@ -1,5 +1,6 @@
 package com.android.runmate.ui.home
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -13,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.runmate.R
 import com.android.runmate.data.DBHelper
+import com.android.runmate.ui.ranking.RankingActivity
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 
 /**
@@ -171,7 +173,7 @@ class HomeActivity : AppCompatActivity() {
             Toast.makeText(this, "챌린지 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
         }
         findViewById<LinearLayout>(R.id.navRanking).setOnClickListener {
-            Toast.makeText(this, "랭킹 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, RankingActivity::class.java))
         }
         findViewById<LinearLayout>(R.id.navMy).setOnClickListener {
             Toast.makeText(this, "마이페이지 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
