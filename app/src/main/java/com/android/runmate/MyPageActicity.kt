@@ -1,12 +1,15 @@
 package com.android.runmate
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.android.runmate.data.DBHelper
+import com.android.runmate.ui.auth.LoginActivity
+import com.android.runmate.util.SessionManager
 
 class MyPageActivity : AppCompatActivity() {
 
-    private val currentUserId = 1 // TODO: 로그인 연결되면 실제 유저 id로 교체
+    private val currentUserId = DBHelper.CURRENT_USER_ID
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -15,6 +18,21 @@ class MyPageActivity : AppCompatActivity() {
         loadProfile()
         loadStats()
         // 사진/이력은 나중에 연결 예정이라 지금은 빈 상태 유지
+
+        findViewById<android.widget.TextView>(R.id.btnLogout).setOnClickListener {
+            logout()
+        }
+    }
+
+    /** 로그아웃: 세션 지우고 로그인 화면으로 이동, 뒤로가기로 다시 못 돌아오게 스택 정리 */
+    private fun logout() {
+        SessionManager.clear(this)
+        DBHelper.CURRENT_USER_ID = 1 // 로그인 전 기본값으로 되돌림
+
+        val intent = Intent(this, LoginActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(intent)
+        finish()
     }
 
     private fun loadProfile() {

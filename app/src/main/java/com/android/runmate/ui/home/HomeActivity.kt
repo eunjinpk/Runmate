@@ -175,7 +175,8 @@ class HomeActivity : AppCompatActivity() {
             Toast.makeText(this, "랭킹 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
         }
         findViewById<LinearLayout>(R.id.navMy).setOnClickListener {
-            Toast.makeText(this, "마이페이지 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
+            // MyPageActicity는 com.android.runmate 최상위 패키지에 있음 (MainActivity랑 같은 위치)
+            startActivity(android.content.Intent(this, com.android.runmate.MyPageActivity::class.java))
         }
     }
 
