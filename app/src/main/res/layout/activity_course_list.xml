@@ -23,7 +23,7 @@
             android:layout_margin="16dp"
             android:padding="6dp"
             android:background="@drawable/bg_circle_white"
-            android:src="@android:drawable/ic_menu_revert"
+            android:src="@drawable/ic_arrow_back"
             app:tint="#212121" />
 
         <LinearLayout
