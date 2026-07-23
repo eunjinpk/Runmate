@@ -89,7 +89,7 @@ class RunProofActivity : AppCompatActivity() {
 
         } catch (e: Exception) {
             e.printStackTrace()
-            toast("카메라를 열 수 없습니다.")
+            toast("에러: ${e}")
         }
     }
 

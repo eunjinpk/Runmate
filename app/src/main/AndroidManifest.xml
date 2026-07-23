@@ -17,13 +17,13 @@
         android:theme="@style/Theme.Runmate">
         <activity
             android:name=".ui.privatejoin.PrivateJoinActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".ui.ranking.RankingActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".ui.proof.RunProofActivity"
-            android:exported="false" />
+            android:exported="true" />
         <activity
             android:name=".ui.home.HomeActivity"
             android:exported="true">
@@ -45,6 +45,14 @@
         <activity
             android:name=".ui.meeting.MeetingDetailActivity"
             android:exported="false" />
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
-
 </manifest>

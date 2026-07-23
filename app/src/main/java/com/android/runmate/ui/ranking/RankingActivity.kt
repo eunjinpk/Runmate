@@ -7,6 +7,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.android.runmate.R
 import com.google.android.material.imageview.ShapeableImageView
@@ -43,6 +44,7 @@ class RankingActivity : AppCompatActivity() {
         bindPodium()
         bindRankList()
         bindMyRank()
+        setupBottomNav()        // ← 이 줄 추가
     }
 
     /** 상위 3명 시상대 */
@@ -164,6 +166,24 @@ class RankingActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvMyRate).text = "${myRank.rate}%"
     }
 
+    /** 하단 네비게이션 */
+    private fun setupBottomNav() {
+        findViewById<LinearLayout>(R.id.navHome).setOnClickListener {
+            finish()   // 홈에서 넘어왔으므로 닫으면 홈으로 돌아감
+        }
+        findViewById<LinearLayout>(R.id.navRanking).setOnClickListener {
+            // 이미 랭킹 화면이라 아무 동작 없음
+        }
+        findViewById<LinearLayout>(R.id.navPlace).setOnClickListener {
+            Toast.makeText(this, "장소 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
+        }
+        findViewById<LinearLayout>(R.id.navChallenge).setOnClickListener {
+            Toast.makeText(this, "챌린지 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
+        }
+        findViewById<LinearLayout>(R.id.navMy).setOnClickListener {
+            Toast.makeText(this, "마이페이지 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
+        }
+    }
     /** dp → px 변환 */
     private fun dp(value: Int): Int =
         (value * resources.displayMetrics.density).toInt()
