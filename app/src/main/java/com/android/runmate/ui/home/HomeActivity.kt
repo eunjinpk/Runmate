@@ -9,6 +9,8 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.runmate.R
@@ -53,11 +55,21 @@ class HomeActivity : AppCompatActivity() {
     )
 
     private var selectedLocation: String? = "여의도" // 시안 기본값과 동일하게 여의도로 시작
-    private var isPublicOnly = false
+    private var isPublicOnly = true
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_home)
+
+        // 엣지-투-엣지 화면에서 3버튼 내비게이션 등 시스템 내비게이션 바가
+        // 우리 앱의 하단 탭바랑 겹치지 않도록, 시스템 바 높이만큼 아래쪽에 여백을 줍니다.
+        val bottomNavBar = findViewById<LinearLayout>(R.id.bottomNavBar)
+        val bottomNavBarBasePadding = bottomNavBar.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(bottomNavBar) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(view.paddingLeft, view.paddingTop, view.paddingRight, bottomNavBarBasePadding + systemBars.bottom)
+            insets
+        }
 
         dbHelper = DBHelper(this)
 
@@ -68,8 +80,6 @@ class HomeActivity : AppCompatActivity() {
         layoutLocationChips = findViewById(R.id.layoutLocationChips)
         etSearch = findViewById(R.id.etSearch)
 
-        val tvSelectedLocation = findViewById<TextView>(R.id.tvSelectedLocation)
-        val layoutLocationSelector = findViewById<LinearLayout>(R.id.layoutLocationSelector)
         val tvNotificationBell = findViewById<TextView>(R.id.tvNotificationBell)
         val fabCreateMeeting = findViewById<ExtendedFloatingActionButton>(R.id.fabCreateMeeting)
 
@@ -95,18 +105,8 @@ class HomeActivity : AppCompatActivity() {
         // 공개만 토글
         tvPublicOnlyToggle.setOnClickListener {
             isPublicOnly = !isPublicOnly
-            tvPublicOnlyToggle.setBackgroundResource(
-                if (isPublicOnly) R.drawable.bg_toggle_active else R.drawable.bg_sort_button
-            )
-            tvPublicOnlyToggle.setTextColor(
-                getColor(if (isPublicOnly) R.color.surface_white else R.color.text_primary)
-            )
+            applyPublicOnlyStyle()
             refreshList(searchQuery = etSearch.text?.toString())
-        }
-
-        // 내 러닝 장소 선택 영역 (지금은 장소 화면이 없어서 자리표시자)
-        layoutLocationSelector.setOnClickListener {
-            Toast.makeText(this, "장소 선택 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
         }
 
         tvNotificationBell.setOnClickListener {
@@ -119,7 +119,8 @@ class HomeActivity : AppCompatActivity() {
 
         setupBottomNav()
 
-        tvSelectedLocation.text = "📍 $selectedLocation 한강공원 ▾"
+        // 시안 기본값: "공개만" 필터가 처음부터 켜져 있는 상태로 시작
+        applyPublicOnlyStyle()
         refreshList()
     }
 
@@ -146,13 +147,21 @@ class HomeActivity : AppCompatActivity() {
                 applyChipStyle(this, location == selectedLocation)
                 setOnClickListener {
                     selectedLocation = location
-                    findViewById<TextView>(R.id.tvSelectedLocation).text = "📍 $location 한강공원 ▾"
                     buildLocationChips()
                     refreshList(searchQuery = etSearch.text?.toString())
                 }
             }
             layoutLocationChips.addView(chip)
         }
+    }
+
+    private fun applyPublicOnlyStyle() {
+        tvPublicOnlyToggle.setBackgroundResource(
+            if (isPublicOnly) R.drawable.bg_toggle_active else R.drawable.bg_sort_button
+        )
+        tvPublicOnlyToggle.setTextColor(
+            getColor(if (isPublicOnly) R.color.surface_white else R.color.text_primary)
+        )
     }
 
     private fun applyChipStyle(chip: TextView, selected: Boolean) {
@@ -163,9 +172,11 @@ class HomeActivity : AppCompatActivity() {
     }
 
     private fun setupBottomNav() {
-        // 지금은 홈 화면만 있어서 다른 탭은 자리표시자입니다.
         findViewById<LinearLayout>(R.id.navPlace).setOnClickListener {
-            Toast.makeText(this, "장소 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
+            // 지도/장소 담당(②번)의 ParkSelectActivity로 이동 (main에 merge됨)
+            startActivity(
+                android.content.Intent(this, com.android.runmate.ui.place.ParkSelectActivity::class.java)
+            )
         }
         findViewById<LinearLayout>(R.id.navChallenge).setOnClickListener {
             Toast.makeText(this, "챌린지 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
