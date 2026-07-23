@@ -3,75 +3,53 @@ package com.android.runmate
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.android.runmate.data.DBHelper
-import com.android.runmate.ui.auth.LoginActivity
-import com.android.runmate.util.SessionManager
 
 class MyPageActivity : AppCompatActivity() {
 
-    private val currentUserId = DBHelper.CURRENT_USER_ID
+    private val currentUserId = 1 // TODO: 로그인 연결되면 실제 유저 id로 교체
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_mypage)
 
-        // 3버튼 내비게이션 등 시스템 내비게이션 바가 하단 탭바랑 안 겹치도록 여백 처리
-        val bottomNavBar = findViewById<LinearLayout>(R.id.bottomNavBar)
-        val bottomNavBarBasePadding = bottomNavBar.paddingBottom
-        ViewCompat.setOnApplyWindowInsetsListener(bottomNavBar) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(view.paddingLeft, view.paddingTop, view.paddingRight, bottomNavBarBasePadding + systemBars.bottom)
-            insets
-        }
-
         loadProfile()
         loadStats()
+        setupPhotoGrid()
 
-        // 정보수정(설정) 버튼 → ProfileSettingsActivity로 이동
         findViewById<ImageView>(R.id.btnSettings).setOnClickListener {
             startActivity(Intent(this, ProfileSettingsActivity::class.java))
-        }
-
-        // 하단 탭바 이동
-        findViewById<LinearLayout>(R.id.navHome).setOnClickListener {
-            val intent = Intent(this, com.android.runmate.ui.home.HomeActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            startActivity(intent)
-        }
-        findViewById<LinearLayout>(R.id.navPlace).setOnClickListener {
-            startActivity(Intent(this, com.android.runmate.ui.place.ParkSelectActivity::class.java))
-        }
-        findViewById<LinearLayout>(R.id.navRanking).setOnClickListener {
-            // TODO: 랭킹 화면 완성되면 연결
-            android.widget.Toast.makeText(this, "랭킹 화면 (연결 예정)", android.widget.Toast.LENGTH_SHORT).show()
-        }
-
-        findViewById<TextView>(R.id.btnLogout).setOnClickListener {
-            logout()
         }
     }
 
     override fun onResume() {
         super.onResume()
-        // 정보수정 화면 등 다녀온 뒤 최신 정보로 다시 불러오기
         loadProfile()
         loadStats()
     }
 
-    /** 로그아웃: 세션 지우고 로그인 화면으로 이동, 뒤로가기로 다시 못 돌아오게 스택 정리 */
-    private fun logout() {
-        SessionManager.clear(this)
-        DBHelper.CURRENT_USER_ID = 1 // 로그인 전 기본값으로 되돌림
+    private fun setupPhotoGrid() {
+        val dummyPhotos = listOf(
+            PhotoItem(R.drawable.running_photo1, "5.2km"),
+            PhotoItem(R.drawable.running_photo2, "Day3"),
+            PhotoItem(R.drawable.running_photo3, "8.0km")
+        )
 
-        val intent = Intent(this, LoginActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        startActivity(intent)
-        finish()
+        val tvPhotoEmpty = findViewById<TextView>(R.id.tvPhotoEmpty)
+        val recyclerPhotos = findViewById<RecyclerView>(R.id.recyclerPhotos)
+
+        tvPhotoEmpty.visibility = android.view.View.GONE
+        recyclerPhotos.visibility = android.view.View.VISIBLE
+        recyclerPhotos.layoutManager = GridLayoutManager(this, 3)
+        recyclerPhotos.adapter = PhotoGridAdapter(dummyPhotos)
+
+        findViewById<TextView>(R.id.tvSeeAllPhotos).setOnClickListener {
+            startActivity(Intent(this, PhotoGalleryActivity::class.java))
+        }
     }
 
     private fun loadProfile() {
