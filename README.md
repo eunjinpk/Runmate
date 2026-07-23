@@ -61,6 +61,7 @@
 | is_public | 공개(1)/비공개(0) |
 | invite_code | 비공개 모임 초대코드 |
 | description | 모임 설명 |
+| pace | 속도 |
 
 ### `meeting_participants` (모임 참여)
 
