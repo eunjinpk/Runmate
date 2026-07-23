@@ -47,6 +47,8 @@
 | nickname | 닉네임 |
 | level | 러닝 레벨 (초보/중급/고수) |
 | profile_img | 프로필 이미지 경로 |
+| username | id |
+| password | 비밀번호 |
 
 ### `meetings` (모임)
 
