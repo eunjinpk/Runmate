@@ -81,6 +81,27 @@ class MeetingDetailActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvLocation).text = "📍 ${meeting.locationName}"
         findViewById<TextView>(R.id.tvDateTime).text = "📅 ${formatRelativeDateTime(meeting.date, meeting.time)}"
 
+        // 내가 만든 모임일 때만 삭제 버튼 노출
+        val btnDelete = findViewById<TextView>(R.id.btnDeleteMeeting)
+        val isHost = meeting.hostId == DBHelper.CURRENT_USER_ID
+        if (isHost) {
+            btnDelete.visibility = View.VISIBLE
+            btnDelete.setOnClickListener {
+                AlertDialog.Builder(this)
+                    .setTitle("모임을 삭제할까요?")
+                    .setMessage("'${meeting.title}' 모임이 삭제되고, 참여자 기록도 함께 사라집니다.")
+                    .setPositiveButton("삭제") { _, _ ->
+                        dbHelper.deleteMeeting(meeting.id)
+                        Toast.makeText(this, "모임을 삭제했어요", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                    .setNegativeButton("취소", null)
+                    .show()
+            }
+        } else {
+            btnDelete.visibility = View.GONE
+        }
+
         val tvFineAndPace = findViewById<TextView>(R.id.tvFineAndPace)
         val hasPace = !meeting.pace.isNullOrBlank()
         if (hasPace) {

@@ -24,9 +24,15 @@ class CreateMeetingActivity : AppCompatActivity() {
 
     companion object {
         // 지도/장소 담당(②번) 쪽에서 이 키로 값을 담아 Intent를 보내주면 됩니다.
-        const val EXTRA_LOCATION_NAME = "extra_location_name" // 필수: 예) "여의도한강공원 · 마포대교 왕복 코스"
-        const val EXTRA_LAT = "extra_lat" // 선택: Double
-        const val EXTRA_LNG = "extra_lng" // 선택: Double
+        // 지도/장소 담당(②번) CourseListActivity가 실제로 보내는 키 이름과 맞춰야 합니다.
+        const val EXTRA_LOCATION_NAME = "location_name" // 필수: 예) "여의도 한강공원"
+        const val EXTRA_LAT = "lat" // 선택: Double
+        const val EXTRA_LNG = "lng" // 선택: Double
+
+        // 코스 레벨(초보/중급/고수) 표시를 위해 추가로 받고 싶은 값들 (팀원 쪽에 요청 필요)
+        const val EXTRA_COURSE_NAME = "course_name" // 선택: 예) "서강대교 순환 코스"
+        const val EXTRA_COURSE_LEVEL = "course_level" // 선택: 예) "중급"
+        const val EXTRA_COURSE_DISTANCE = "course_distance" // 선택: Double, 예) 5.0
     }
 
     private lateinit var dbHelper: DBHelper
@@ -70,7 +76,25 @@ class CreateMeetingActivity : AppCompatActivity() {
         // 장소 선택 화면(#6/#6-2)에서 넘어온 경우, 자동으로 채우고 직접 수정 못 하게 잠급니다.
         val incomingLocation = intent.getStringExtra(EXTRA_LOCATION_NAME)
         if (!incomingLocation.isNullOrBlank()) {
-            etLocation.setText(incomingLocation)
+            val courseName = intent.getStringExtra(EXTRA_COURSE_NAME)
+            val courseLevel = intent.getStringExtra(EXTRA_COURSE_LEVEL)
+            val courseDistance = if (intent.hasExtra(EXTRA_COURSE_DISTANCE)) {
+                intent.getDoubleExtra(EXTRA_COURSE_DISTANCE, 0.0)
+            } else null
+
+            val displayText = buildString {
+                append(incomingLocation)
+                if (!courseName.isNullOrBlank()) append(" · $courseName")
+                if (!courseLevel.isNullOrBlank() || courseDistance != null) {
+                    val detail = listOfNotNull(
+                        courseLevel,
+                        courseDistance?.let { "${it}km" }
+                    ).joinToString(" · ")
+                    append(" ($detail)")
+                }
+            }
+
+            etLocation.setText(displayText)
             etLocation.isFocusable = false
             etLocation.isClickable = false
             if (intent.hasExtra(EXTRA_LAT)) selectedLat = intent.getDoubleExtra(EXTRA_LAT, 0.0)
@@ -196,7 +220,13 @@ class CreateMeetingActivity : AppCompatActivity() {
             description = description.ifEmpty { null }
         )
 
-        Toast.makeText(this, "모임이 만들어졌어요!", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "모임이 생성되었습니다", Toast.LENGTH_SHORT).show()
+
+        // 장소선택(#6)→코스추천(#6-2)→모임만들기(#4)로 쌓인 화면 스택을 다 정리하고
+        // 곧바로 홈 화면으로 이동합니다 (뒤로가기 여러 번 안 눌러도 되게).
+        val homeIntent = android.content.Intent(this, com.android.runmate.ui.home.HomeActivity::class.java)
+        homeIntent.flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(homeIntent)
         finish()
     }
 }

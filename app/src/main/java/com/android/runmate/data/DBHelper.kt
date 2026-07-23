@@ -404,4 +404,11 @@ class DBHelper(context: Context) :
             arrayOf(meetingId.toString(), userId.toString())
         )
     }
+
+    /** 모임 삭제(호스트 전용): 참여자 기록 먼저 지우고 모임 자체를 삭제 */
+    fun deleteMeeting(meetingId: Int) {
+        val db = writableDatabase
+        db.delete("meeting_participants", "meeting_id = ?", arrayOf(meetingId.toString()))
+        db.delete("meetings", "id = ?", arrayOf(meetingId.toString()))
+    }
 }

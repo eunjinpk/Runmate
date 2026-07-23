@@ -37,6 +37,21 @@
                     android:textColor="@color/text_primary"
                     android:textSize="18sp" />
 
+                <!-- 내가 만든 모임일 때만 보임 (호스트 전용 삭제) -->
+                <TextView
+                    android:id="@+id/btnDeleteMeeting"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="top|end"
+                    android:layout_margin="16dp"
+                    android:background="@drawable/bg_circle"
+                    android:backgroundTint="@color/surface_white"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:text="🗑"
+                    android:textSize="16sp"
+                    android:visibility="gone" />
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
