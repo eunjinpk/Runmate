@@ -1,6 +1,7 @@
 package com.android.runmate.ui.meeting
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.ImageView
@@ -181,11 +182,11 @@ class MeetingDetailActivity : AppCompatActivity() {
                 btnJoin.setBackgroundResource(R.drawable.bg_chip_selected)
                 btnJoin.setTextColor(getColor(R.color.surface_white))
                 btnJoin.setOnClickListener {
-                    // TODO: 러닝 인증 담당(③번) 화면이 완성되면 아래 Toast 대신 그 화면으로 이동
-                    // val intent = Intent(this, RunningProofActivity::class.java)
-                    // intent.putExtra("meeting_id", meeting.id)
-                    // startActivity(intent)
-                    Toast.makeText(this, "러닝 인증 화면 (연동 예정)", Toast.LENGTH_SHORT).show()
+                    // 러닝 인증 화면(#7)으로 이동
+                    val intent = Intent(this, com.android.runmate.ui.proof.RunProofActivity::class.java)
+                    intent.putExtra("meeting_id", meeting.id)
+                    intent.putExtra("meeting_name", meeting.title)
+                    startActivity(intent)
                 }
             }
             spotsLeft <= 0 -> {
