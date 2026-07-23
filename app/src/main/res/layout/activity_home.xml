@@ -35,57 +35,24 @@
                     android:orientation="horizontal"
                     android:gravity="center_vertical">
 
-                    <LinearLayout
-                        android:id="@+id/layoutLocationSelector"
+                    <TextView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_circle"
+                        android:backgroundTint="@color/surface_white"
+                        android:gravity="center"
+                        android:text="🏃"
+                        android:textSize="18sp" />
+
+                    <TextView
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:orientation="vertical"
-                        android:clickable="true"
-                        android:focusable="true">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="내 러닝 장소"
-                            android:textColor="@color/surface_white"
-                            android:textSize="12sp" />
-
-                        <TextView
-                            android:id="@+id/tvSelectedLocation"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="2dp"
-                            android:text="📍 여의도 한강공원 ▾"
-                            android:textColor="@color/surface_white"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <!-- 알림벨: 원형 배경 + 우측상단 빨간 점 -->
-                    <FrameLayout
-                        android:layout_width="40dp"
-                        android:layout_height="40dp">
-
-                        <TextView
-                            android:id="@+id/tvNotificationBell"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:background="@drawable/bg_circle"
-                            android:backgroundTint="@color/bell_circle_bg"
-                            android:gravity="center"
-                            android:text="🔔"
-                            android:textSize="18sp" />
-
-                        <View
-                            android:layout_width="9dp"
-                            android:layout_height="9dp"
-                            android:layout_gravity="top|end"
-                            android:layout_marginTop="4dp"
-                            android:layout_marginEnd="4dp"
-                            android:background="@drawable/bg_circle"
-                            android:backgroundTint="@color/notification_red" />
-                    </FrameLayout>
+                        android:layout_marginStart="10dp"
+                        android:text="런메이트"
+                        android:textColor="@color/surface_white"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
 
                 <!-- 검색창 -->
@@ -110,7 +77,7 @@
                         android:layout_height="46dp"
                         android:layout_weight="1"
                         android:background="@android:color/transparent"
-                        android:hint="한강공원·지하철역·모임 이름 검색"
+                        android:hint="모임 이름 검색"
                         android:imeOptions="actionSearch"
                         android:inputType="text"
                         android:maxLines="1"
@@ -126,37 +93,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:paddingHorizontal="20dp"
                 android:paddingTop="14dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="지하철역 근처 한강공원"
-                        android:textColor="@color/text_primary"
-                        android:textSize="13sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/tvMapView"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="지도로 보기"
-                        android:textColor="@color/text_primary"
-                        android:textSize="12sp" />
-                </LinearLayout>
 
                 <HorizontalScrollView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
+                    android:paddingHorizontal="20dp"
                     android:scrollbars="none">
 
                     <LinearLayout
@@ -187,19 +129,6 @@
                     android:textStyle="bold" />
 
                 <TextView
-                    android:id="@+id/tvSortLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/bg_sort_button"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="5dp"
-                    android:text="⇅ 마감임박순"
-                    android:textColor="@color/text_primary"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-
-                <TextView
                     android:id="@+id/tvPublicOnlyToggle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -207,7 +136,7 @@
                     android:paddingHorizontal="10dp"
                     android:paddingVertical="5dp"
                     android:text="공개만"
-                    android:textColor="@color/run_blue"
+                    android:textColor="@color/text_primary"
                     android:textSize="12sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -252,6 +181,7 @@
 
     <!-- 하단 탭바: 홈/장소/챌린지/랭킹/마이 -->
     <LinearLayout
+        android:id="@+id/bottomNavBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/surface_white"
@@ -281,18 +211,6 @@
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📍" android:textSize="18sp" />
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="장소" android:textColor="@color/text_secondary" android:textSize="11sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navChallenge"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🚩" android:textSize="18sp" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="챌린지" android:textColor="@color/text_secondary" android:textSize="11sp" />
         </LinearLayout>
 
         <LinearLayout

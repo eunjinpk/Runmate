@@ -4,33 +4,41 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
+/**
+ * 1차 회의에서 확정한 6개 테이블 구조를 그대로 반영한 DBHelper입니다.
+ * 컬럼명은 회의록 기준으로 임의 변경 없이 작성했습니다.
+ * 팀원들이 각자 화면을 만들 때 이 클래스를 공용으로 사용하면 됩니다.
+ */
 class DBHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     companion object {
         private const val DATABASE_NAME = "runmate.db"
-        private const val DATABASE_VERSION = 2 // v2: meetings에 fine_amount, pace 컬럼 추가 (팀 확정)
+        private const val DATABASE_VERSION = 4 // v4: 로그인 기능 위해 users에 username, password 컬럼 추가
 
-        // 로그인/회원가입 화면이 아직 없어서, 지금은 항상 이 유저(id=1)로 동작합니다.
-        // 로그인 기능이 붙으면 이 값을 실제 로그인한 유저 id로 바꿔주면 됩니다.
-        const val CURRENT_USER_ID = 1
+        // 로그인 성공 시 이 값을 실제 로그인한 유저 id로 바꿔줍니다 (SessionManager와 함께 씁니다).
+        // 아직 로그인 안 한 상태(스플래시 최초 실행 등)의 기본값은 1입니다.
+        var CURRENT_USER_ID = 1
     }
 
     override fun onCreate(db: SQLiteDatabase) {
         // users (유저)
+        // v4에서 로그인용 username(아이디), password 컬럼 추가
         db.execSQL(
             """
             CREATE TABLE users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nickname TEXT NOT NULL,
                 level TEXT NOT NULL DEFAULT '초보',
-                profile_img TEXT
+                profile_img TEXT,
+                username TEXT UNIQUE,
+                password TEXT
             )
             """.trimIndent()
         )
 
         // meetings (모임)
-        // v2에서 fine_amount(노쇼 벌금액), pace(목표 페이스) 두 컬럼 추가 (팀 확정)
+        // v2에서 pace(목표 페이스) 컬럼 추가, v3에서 벌금 제도 폐지로 fine_amount 제거 (팀 확정)
         db.execSQL(
             """
             CREATE TABLE meetings (
@@ -46,7 +54,6 @@ class DBHelper(context: Context) :
                 is_public INTEGER NOT NULL DEFAULT 1,
                 invite_code TEXT,
                 description TEXT,
-                fine_amount INTEGER NOT NULL DEFAULT 0,
                 pace TEXT,
                 FOREIGN KEY(host_id) REFERENCES users(id)
             )
@@ -136,9 +143,9 @@ class DBHelper(context: Context) :
         db.execSQL(
             """
             INSERT INTO meetings
-                (host_id, title, date, time, location_name, lat, lng, max_people, is_public, description, fine_amount, pace)
+                (host_id, title, date, time, location_name, lat, lng, max_people, is_public, description, pace)
             VALUES
-                (1, '여의도 저녁 러닝', '2026-07-24', '19:30', '여의도한강공원', 37.5285, 126.9330, 6, 1, '가볍게 5km 뛰어요', 3000, '6~7')
+                (1, '여의도 저녁 러닝', '2026-07-24', '19:30', '여의도한강공원', 37.5285, 126.9330, 6, 1, '가볍게 5km 뛰어요', '6~7')
             """.trimIndent()
         )
         db.execSQL(
@@ -241,7 +248,6 @@ class DBHelper(context: Context) :
 
     /**
      * 모임 만들기(#2) 화면에서 사용. meetings 테이블에 새 모임을 추가하고 새 id를 반환합니다.
-     * 노쇼 벌금액(fine_amount) 컬럼은 현재 확정된 스키마에 없어서 저장하지 않습니다.
      */
     fun insertMeeting(
         hostId: Int,
@@ -255,7 +261,6 @@ class DBHelper(context: Context) :
         isPublic: Boolean,
         inviteCode: String?,
         description: String?,
-        fineAmount: Int = 0,
         pace: String? = null
     ): Long {
         val db = writableDatabase
@@ -271,7 +276,6 @@ class DBHelper(context: Context) :
             put("is_public", if (isPublic) 1 else 0)
             put("invite_code", inviteCode)
             put("description", description)
-            put("fine_amount", fineAmount)
             put("pace", pace)
         }
         return db.insert("meetings", null, values)
@@ -284,7 +288,7 @@ class DBHelper(context: Context) :
         val db = readableDatabase
         val query = """
             SELECT m.id, m.host_id, m.title, m.date, m.time, m.location_name, m.description,
-                   m.max_people, m.is_public, m.fine_amount, m.pace,
+                   m.max_people, m.is_public, m.pace,
                    u.nickname AS host_nickname,
                    (SELECT COUNT(*) FROM meeting_participants p WHERE p.meeting_id = m.id) AS joined_count
             FROM meetings m
@@ -308,7 +312,6 @@ class DBHelper(context: Context) :
                     maxPeople = getInt(getColumnIndexOrThrow("max_people")),
                     isPublic = getInt(getColumnIndexOrThrow("is_public")) == 1,
                     joinedCount = getInt(getColumnIndexOrThrow("joined_count")),
-                    fineAmount = getInt(getColumnIndexOrThrow("fine_amount")),
                     pace = getString(getColumnIndexOrThrow("pace"))
                 )
             }
@@ -393,5 +396,63 @@ class DBHelper(context: Context) :
             put("status", "joined")
         }
         db.insert("meeting_participants", null, values)
+    }
+
+    /** 취소하기 버튼: meeting_participants에서 참여 기록 삭제 */
+    fun leaveMeeting(meetingId: Int, userId: Int) {
+        val db = writableDatabase
+        db.delete(
+            "meeting_participants",
+            "meeting_id = ? AND user_id = ?",
+            arrayOf(meetingId.toString(), userId.toString())
+        )
+    }
+
+    /** 모임 삭제(호스트 전용): 참여자 기록 먼저 지우고 모임 자체를 삭제 */
+    fun deleteMeeting(meetingId: Int) {
+        val db = writableDatabase
+        db.delete("meeting_participants", "meeting_id = ?", arrayOf(meetingId.toString()))
+        db.delete("meetings", "id = ?", arrayOf(meetingId.toString()))
+    }
+
+    /** 이미 쓰이고 있는 아이디인지 확인 (회원가입 화면 중복체크용) */
+    fun isUsernameTaken(username: String): Boolean {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT id FROM users WHERE username = ?", arrayOf(username))
+        val exists = cursor.moveToFirst()
+        cursor.close()
+        return exists
+    }
+
+    /**
+     * 회원가입: users 테이블에 새 유저 추가하고 새 id를 반환합니다.
+     * 비밀번호는 학교 과제 범위라 평문 저장입니다 (실제 서비스라면 해시 처리 필요).
+     */
+    fun registerUser(nickname: String, username: String, password: String): Long {
+        val db = writableDatabase
+        val values = android.content.ContentValues().apply {
+            put("nickname", nickname)
+            put("username", username)
+            put("password", password)
+            put("level", "초보")
+        }
+        return db.insert("users", null, values)
+    }
+
+    /**
+     * 로그인: 아이디/비밀번호가 맞으면 유저 id를 반환하고, 안 맞으면 null을 반환합니다.
+     */
+    fun login(username: String, password: String): Int? {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT id FROM users WHERE username = ? AND password = ?",
+            arrayOf(username, password)
+        )
+        var userId: Int? = null
+        if (cursor.moveToFirst()) {
+            userId = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
+        }
+        cursor.close()
+        return userId
     }
 }

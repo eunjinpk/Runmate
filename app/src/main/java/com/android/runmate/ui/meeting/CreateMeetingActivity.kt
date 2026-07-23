@@ -13,11 +13,27 @@ import java.util.Calendar
 
 /**
  * 모임 만들기 화면 (#2).
- * 노쇼 벌금액은 현재 확정된 meetings 스키마에 없어서 이 화면엔 없습니다.
- * 장소는 지도/장소 담당 화면이 아직 없어서 텍스트 직접입력으로 대체했고,
- * 그 화면이 완성되면 etLocation을 결과값 연동으로 바꾸면 됩니다.
+ * 벌금 제도는 팀 확정으로 폐지되어 이 화면엔 없습니다.
+ *
+ * 장소는 지도/장소 담당(②번)의 한강공원 선택(#6)→러닝코스 추천(#6-2) 화면에서
+ * 고른 다음 이 화면으로 넘어오는 게 정식 흐름입니다.
+ * 그 화면에서 아래 Intent extra로 값을 담아서 이 액티비티를 열면,
+ * 장소가 자동으로 채워지고 직접 타이핑할 필요가 없어집니다.
  */
 class CreateMeetingActivity : AppCompatActivity() {
+
+    companion object {
+        // 지도/장소 담당(②번) 쪽에서 이 키로 값을 담아 Intent를 보내주면 됩니다.
+        // 지도/장소 담당(②번) CourseListActivity가 실제로 보내는 키 이름과 맞춰야 합니다.
+        const val EXTRA_LOCATION_NAME = "location_name" // 필수: 예) "여의도 한강공원"
+        const val EXTRA_LAT = "lat" // 선택: Double
+        const val EXTRA_LNG = "lng" // 선택: Double
+
+        // 코스 레벨(초보/중급/고수) 표시를 위해 추가로 받고 싶은 값들 (팀원 쪽에 요청 필요)
+        const val EXTRA_COURSE_NAME = "course_name" // 선택: 예) "서강대교 순환 코스"
+        const val EXTRA_COURSE_LEVEL = "course_level" // 선택: 예) "중급"
+        const val EXTRA_COURSE_DISTANCE = "course_distance" // 선택: Double, 예) 5.0
+    }
 
     private lateinit var dbHelper: DBHelper
 
@@ -30,8 +46,6 @@ class CreateMeetingActivity : AppCompatActivity() {
     private lateinit var tvPeopleCount: TextView
     private lateinit var btnPublic: TextView
     private lateinit var btnPrivate: TextView
-    private lateinit var etPace: EditText
-    private lateinit var fineButtons: Map<TextView, Int>
 
     private var selectedYear = 0
     private var selectedMonth = 0
@@ -40,7 +54,8 @@ class CreateMeetingActivity : AppCompatActivity() {
     private var selectedMinute = -1
     private var peopleCount = 6
     private var isPublic = true
-    private var fineAmount = 0
+    private var selectedLat: Double? = null
+    private var selectedLng: Double? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,16 +72,33 @@ class CreateMeetingActivity : AppCompatActivity() {
         tvPeopleCount = findViewById(R.id.tvPeopleCount)
         btnPublic = findViewById(R.id.btnPublic)
         btnPrivate = findViewById(R.id.btnPrivate)
-        etPace = findViewById(R.id.etPace)
 
-        fineButtons = mapOf(
-            findViewById<TextView>(R.id.btnFine0) to 0,
-            findViewById<TextView>(R.id.btnFine3000) to 3000,
-            findViewById<TextView>(R.id.btnFine5000) to 5000,
-            findViewById<TextView>(R.id.btnFine10000) to 10000
-        )
-        fineButtons.keys.forEach { button ->
-            button.setOnClickListener { selectFine(fineButtons.getValue(button)) }
+        // 장소 선택 화면(#6/#6-2)에서 넘어온 경우, 자동으로 채우고 직접 수정 못 하게 잠급니다.
+        val incomingLocation = intent.getStringExtra(EXTRA_LOCATION_NAME)
+        if (!incomingLocation.isNullOrBlank()) {
+            val courseName = intent.getStringExtra(EXTRA_COURSE_NAME)
+            val courseLevel = intent.getStringExtra(EXTRA_COURSE_LEVEL)
+            val courseDistance = if (intent.hasExtra(EXTRA_COURSE_DISTANCE)) {
+                intent.getDoubleExtra(EXTRA_COURSE_DISTANCE, 0.0)
+            } else null
+
+            val displayText = buildString {
+                append(incomingLocation)
+                if (!courseName.isNullOrBlank()) append(" · $courseName")
+                if (!courseLevel.isNullOrBlank() || courseDistance != null) {
+                    val detail = listOfNotNull(
+                        courseLevel,
+                        courseDistance?.let { "${it}km" }
+                    ).joinToString(" · ")
+                    append(" ($detail)")
+                }
+            }
+
+            etLocation.setText(displayText)
+            etLocation.isFocusable = false
+            etLocation.isClickable = false
+            if (intent.hasExtra(EXTRA_LAT)) selectedLat = intent.getDoubleExtra(EXTRA_LAT, 0.0)
+            if (intent.hasExtra(EXTRA_LNG)) selectedLng = intent.getDoubleExtra(EXTRA_LNG, 0.0)
         }
 
         findViewById<TextView>(R.id.btnBack).setOnClickListener { finish() }
@@ -127,19 +159,6 @@ class CreateMeetingActivity : AppCompatActivity() {
         ).show()
     }
 
-    private fun selectFine(amount: Int) {
-        fineAmount = amount
-        fineButtons.forEach { (button, value) ->
-            if (value == amount) {
-                button.setBackgroundResource(R.drawable.bg_chip_selected)
-                button.setTextColor(getColor(R.color.surface_white))
-            } else {
-                button.setBackgroundResource(R.drawable.bg_chip_unselected)
-                button.setTextColor(getColor(R.color.text_primary))
-            }
-        }
-    }
-
     private fun setPublic(publicSelected: Boolean) {
         isPublic = publicSelected
         if (publicSelected) {
@@ -186,7 +205,6 @@ class CreateMeetingActivity : AppCompatActivity() {
 
         val dateStr = "%04d-%02d-%02d".format(selectedYear, selectedMonth + 1, selectedDay)
         val timeStr = "%02d:%02d".format(selectedHour, selectedMinute)
-        val pace = etPace.text.toString().trim()
 
         dbHelper.insertMeeting(
             hostId = DBHelper.CURRENT_USER_ID,
@@ -194,17 +212,21 @@ class CreateMeetingActivity : AppCompatActivity() {
             date = dateStr,
             time = timeStr,
             locationName = location,
-            lat = null,
-            lng = null,
+            lat = selectedLat,
+            lng = selectedLng,
             maxPeople = peopleCount,
             isPublic = isPublic,
             inviteCode = if (isPublic) null else inviteCode,
-            description = description.ifEmpty { null },
-            fineAmount = fineAmount,
-            pace = pace.ifEmpty { null }
+            description = description.ifEmpty { null }
         )
 
-        Toast.makeText(this, "모임이 만들어졌어요!", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "모임이 생성되었습니다", Toast.LENGTH_SHORT).show()
+
+        // 장소선택(#6)→코스추천(#6-2)→모임만들기(#4)로 쌓인 화면 스택을 다 정리하고
+        // 곧바로 홈 화면으로 이동합니다 (뒤로가기 여러 번 안 눌러도 되게).
+        val homeIntent = android.content.Intent(this, com.android.runmate.ui.home.HomeActivity::class.java)
+        homeIntent.flags = android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(homeIntent)
         finish()
     }
 }
