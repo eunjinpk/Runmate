@@ -17,25 +17,28 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- 지도 영역: 지도/장소 담당 화면 완성되면 실제 지도로 교체 -->
+            <!-- 지도 영역: PlaceRepository의 실제 한강공원 이미지로 채워짐 (MeetingDetailActivity에서 세팅) -->
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="180dp"
                 android:background="@color/run_sky">
 
-                <TextView
+                <ImageView
+                    android:id="@+id/ivMapImage"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop" />
+
+                <ImageView
                     android:id="@+id/btnBack"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="top|start"
                     android:layout_margin="16dp"
-                    android:background="@drawable/bg_circle"
-                    android:backgroundTint="@color/surface_white"
-                    android:gravity="center"
-                    android:padding="10dp"
-                    android:text="←"
-                    android:textColor="@color/text_primary"
-                    android:textSize="18sp" />
+                    android:background="@android:color/transparent"
+                    android:padding="6dp"
+                    android:src="@drawable/abc_ic_ab_back_material"
+                    app:tint="@color/text_primary" />
 
                 <!-- 내가 만든 모임일 때만 보임 (호스트 전용 삭제) -->
                 <TextView
@@ -51,13 +54,6 @@
                     android:text="🗑"
                     android:textSize="16sp"
                     android:visibility="gone" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:text="📍"
-                    android:textSize="36sp" />
             </FrameLayout>
 
             <LinearLayout
