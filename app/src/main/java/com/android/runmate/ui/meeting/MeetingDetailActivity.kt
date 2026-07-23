@@ -3,6 +3,7 @@ package com.android.runmate.ui.meeting
 import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
@@ -13,6 +14,7 @@ import com.android.runmate.R
 import com.android.runmate.data.DBHelper
 import com.android.runmate.data.MeetingDetail
 import com.android.runmate.data.Participant
+import com.android.runmate.data.PlaceRepository
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -49,7 +51,7 @@ class MeetingDetailActivity : AppCompatActivity() {
             insets
         }
 
-        findViewById<TextView>(R.id.btnBack).setOnClickListener { finish() }
+        findViewById<ImageView>(R.id.btnBack).setOnClickListener { finish() }
 
         if (meetingId == -1) {
             Toast.makeText(this, "모임 정보를 불러올 수 없어요", Toast.LENGTH_SHORT).show()
@@ -80,6 +82,11 @@ class MeetingDetailActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvTitle).text = meeting.title
         findViewById<TextView>(R.id.tvLocation).text = "📍 ${meeting.locationName}"
         findViewById<TextView>(R.id.tvDateTime).text = "📅 ${formatRelativeDateTime(meeting.date, meeting.time)}"
+
+        // 모임 장소명(예: "여의도한강공원")으로 실제 한강공원 이미지를 찾아서 보여줌
+        findViewById<ImageView>(R.id.ivMapImage).setImageResource(
+            PlaceRepository.getMapImageResource(meeting.locationName)
+        )
 
         // 내가 만든 모임일 때만 삭제 버튼 노출
         val btnDelete = findViewById<TextView>(R.id.btnDeleteMeeting)
