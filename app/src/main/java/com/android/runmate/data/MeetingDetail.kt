@@ -15,7 +15,6 @@ data class MeetingDetail(
     val maxPeople: Int,
     val isPublic: Boolean,
     val joinedCount: Int,
-    val fineAmount: Int,
     val pace: String?
 )
 

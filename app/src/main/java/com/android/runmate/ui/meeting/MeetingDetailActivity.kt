@@ -1,11 +1,14 @@
 package com.android.runmate.ui.meeting
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.android.runmate.R
 import com.android.runmate.data.DBHelper
 import com.android.runmate.data.MeetingDetail
@@ -17,7 +20,7 @@ import java.util.Locale
 
 /**
  * 모임 상세 화면 (#3).
- * 거리/페이스/노쇼 벌금 표시는 현재 확정된 스키마에 없어서 이 화면엔 없습니다.
+ * 거리 표시는 현재 확정된 스키마에 없어서 이 화면엔 없습니다. 벌금 제도는 팀 확정으로 폐지되었습니다.
  * 지도는 지도/장소 담당 화면이 완성되면 상단 자리표시자 영역을 실제 지도로 교체하면 됩니다.
  */
 class MeetingDetailActivity : AppCompatActivity() {
@@ -35,6 +38,16 @@ class MeetingDetailActivity : AppCompatActivity() {
 
         dbHelper = DBHelper(this)
         meetingId = intent.getIntExtra(EXTRA_MEETING_ID, -1)
+
+        // 엣지-투-엣지 화면에서 3버튼 내비게이션 등 시스템 내비게이션 바가
+        // 하단 버튼(참여하기 등)이랑 겹치지 않도록 여백 처리
+        val bottomButtonBar = findViewById<LinearLayout>(R.id.bottomButtonBar)
+        val bottomButtonBarBasePadding = bottomButtonBar.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(bottomButtonBar) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(view.paddingLeft, view.paddingTop, view.paddingRight, bottomButtonBarBasePadding + systemBars.bottom)
+            insets
+        }
 
         findViewById<TextView>(R.id.btnBack).setOnClickListener { finish() }
 
@@ -68,14 +81,32 @@ class MeetingDetailActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvLocation).text = "📍 ${meeting.locationName}"
         findViewById<TextView>(R.id.tvDateTime).text = "📅 ${formatRelativeDateTime(meeting.date, meeting.time)}"
 
+        // 내가 만든 모임일 때만 삭제 버튼 노출
+        val btnDelete = findViewById<TextView>(R.id.btnDeleteMeeting)
+        val isHost = meeting.hostId == DBHelper.CURRENT_USER_ID
+        if (isHost) {
+            btnDelete.visibility = View.VISIBLE
+            btnDelete.setOnClickListener {
+                AlertDialog.Builder(this)
+                    .setTitle("모임을 삭제할까요?")
+                    .setMessage("'${meeting.title}' 모임이 삭제되고, 참여자 기록도 함께 사라집니다.")
+                    .setPositiveButton("삭제") { _, _ ->
+                        dbHelper.deleteMeeting(meeting.id)
+                        Toast.makeText(this, "모임을 삭제했어요", Toast.LENGTH_SHORT).show()
+                        finish()
+                    }
+                    .setNegativeButton("취소", null)
+                    .show()
+            }
+        } else {
+            btnDelete.visibility = View.GONE
+        }
+
         val tvFineAndPace = findViewById<TextView>(R.id.tvFineAndPace)
-        val hasFine = meeting.fineAmount > 0
         val hasPace = !meeting.pace.isNullOrBlank()
-        if (hasFine || hasPace) {
+        if (hasPace) {
             tvFineAndPace.visibility = View.VISIBLE
-            val fineText = if (hasFine) "노쇼 벌금 ${"%,d".format(meeting.fineAmount)}원" else null
-            val paceText = if (hasPace) "페이스 ${meeting.pace}/km" else null
-            tvFineAndPace.text = "⏰ " + listOfNotNull(fineText, paceText).joinToString(" · ")
+            tvFineAndPace.text = "⏰ 페이스 ${meeting.pace}/km"
         } else {
             tvFineAndPace.visibility = View.GONE
         }
@@ -114,36 +145,71 @@ class MeetingDetailActivity : AppCompatActivity() {
         }
 
         val btnJoin = findViewById<TextView>(R.id.btnJoin)
+        val btnSecondary = findViewById<TextView>(R.id.btnSecondary)
         val alreadyJoined = dbHelper.hasUserJoined(meeting.id, DBHelper.CURRENT_USER_ID)
+
         when {
             alreadyJoined -> {
-                btnJoin.text = "참여 완료"
-                btnJoin.isEnabled = false
-                btnJoin.setBackgroundResource(R.drawable.bg_chip_unselected)
-                btnJoin.setTextColor(getColor(R.color.text_secondary))
+                // 참여 확정 상태: 왼쪽 = 취소하기, 오른쪽 = 종료하기
+                btnSecondary.visibility = View.VISIBLE
+                btnSecondary.text = "취소하기"
+                btnSecondary.isEnabled = true
+                btnSecondary.setBackgroundResource(R.drawable.bg_chip_unselected)
+                btnSecondary.setTextColor(getColor(R.color.text_primary))
+                btnSecondary.setOnClickListener {
+                    AlertDialog.Builder(this)
+                        .setTitle("참여를 취소할까요?")
+                        .setMessage("'${meeting.title}' 모임 참여를 취소합니다.")
+                        .setPositiveButton("확인") { _, _ ->
+                            dbHelper.leaveMeeting(meeting.id, DBHelper.CURRENT_USER_ID)
+                            Toast.makeText(this, "참여를 취소했어요", Toast.LENGTH_SHORT).show()
+                            loadDetail()
+                        }
+                        .setNegativeButton("닫기", null)
+                        .show()
+                }
+
+                btnJoin.text = "종료하기"
+                btnJoin.isEnabled = true
+                btnJoin.setBackgroundResource(R.drawable.bg_chip_selected)
+                btnJoin.setTextColor(getColor(R.color.surface_white))
+                btnJoin.setOnClickListener {
+                    // TODO: 러닝 인증 담당(③번) 화면이 완성되면 아래 Toast 대신 그 화면으로 이동
+                    // val intent = Intent(this, RunningProofActivity::class.java)
+                    // intent.putExtra("meeting_id", meeting.id)
+                    // startActivity(intent)
+                    Toast.makeText(this, "러닝 인증 화면 (연동 예정)", Toast.LENGTH_SHORT).show()
+                }
             }
             spotsLeft <= 0 -> {
+                btnSecondary.visibility = View.GONE
+
                 btnJoin.text = "모집 마감"
                 btnJoin.isEnabled = false
                 btnJoin.setBackgroundResource(R.drawable.bg_chip_unselected)
                 btnJoin.setTextColor(getColor(R.color.text_secondary))
             }
             else -> {
+                // 아직 참여 전: 참여하기 버튼 하나만 보임
+                btnSecondary.visibility = View.GONE
+
                 btnJoin.text = "참여하기"
                 btnJoin.isEnabled = true
                 btnJoin.setBackgroundResource(R.drawable.bg_chip_selected)
                 btnJoin.setTextColor(getColor(R.color.surface_white))
                 btnJoin.setOnClickListener {
-                    dbHelper.joinMeeting(meeting.id, DBHelper.CURRENT_USER_ID)
-                    Toast.makeText(this, "참여했어요!", Toast.LENGTH_SHORT).show()
-                    loadDetail()
+                    AlertDialog.Builder(this)
+                        .setTitle("모임에 참여할까요?")
+                        .setMessage("'${meeting.title}'\n${formatRelativeDateTime(meeting.date, meeting.time)} · ${meeting.locationName}")
+                        .setPositiveButton("확인") { _, _ ->
+                            dbHelper.joinMeeting(meeting.id, DBHelper.CURRENT_USER_ID)
+                            Toast.makeText(this, "참여했어요!", Toast.LENGTH_SHORT).show()
+                            loadDetail()
+                        }
+                        .setNegativeButton("취소", null)
+                        .show()
                 }
             }
-        }
-
-        // 출석체크는 러닝 인증 담당 화면과 연동될 기능이라 지금은 자리표시자로만 둡니다.
-        findViewById<TextView>(R.id.btnAttendanceCheck).setOnClickListener {
-            Toast.makeText(this, "모임 시작 후 이용 가능해요 (연동 예정)", Toast.LENGTH_SHORT).show()
         }
     }
 

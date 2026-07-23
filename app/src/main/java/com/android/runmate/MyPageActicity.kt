@@ -2,6 +2,7 @@ package com.android.runmate
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.android.runmate.data.DBHelper
 
 class MyPageActivity : AppCompatActivity() {
 

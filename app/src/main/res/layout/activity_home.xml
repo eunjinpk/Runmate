@@ -53,31 +53,6 @@
                         android:textColor="@color/surface_white"
                         android:textSize="20sp"
                         android:textStyle="bold" />
-
-                    <!-- 알림벨: 원형 배경 + 우측상단 빨간 점 -->
-                    <FrameLayout
-                        android:layout_width="40dp"
-                        android:layout_height="40dp">
-
-                        <TextView
-                            android:id="@+id/tvNotificationBell"
-                            android:layout_width="40dp"
-                            android:layout_height="40dp"
-                            android:background="@drawable/bg_circle"
-                            android:backgroundTint="@color/bell_circle_bg"
-                            android:gravity="center"
-                            android:text="🔔"
-                            android:textSize="18sp" />
-
-                        <View
-                            android:layout_width="9dp"
-                            android:layout_height="9dp"
-                            android:layout_gravity="top|end"
-                            android:layout_marginTop="4dp"
-                            android:layout_marginEnd="4dp"
-                            android:background="@drawable/bg_circle"
-                            android:backgroundTint="@color/notification_red" />
-                    </FrameLayout>
                 </LinearLayout>
 
                 <!-- 검색창 -->
@@ -151,19 +126,6 @@
                     android:text="모집 중 0"
                     android:textColor="@color/text_primary"
                     android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvSortLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:background="@drawable/bg_sort_button"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="5dp"
-                    android:text="⇅ 마감임박순"
-                    android:textColor="@color/text_primary"
-                    android:textSize="12sp"
                     android:textStyle="bold" />
 
                 <TextView
@@ -249,18 +211,6 @@
 
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📍" android:textSize="18sp" />
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="장소" android:textColor="@color/text_secondary" android:textSize="11sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/navChallenge"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🚩" android:textSize="18sp" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="2dp" android:text="챌린지" android:textColor="@color/text_secondary" android:textSize="11sp" />
         </LinearLayout>
 
         <LinearLayout

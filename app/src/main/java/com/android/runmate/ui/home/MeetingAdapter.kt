@@ -45,7 +45,6 @@ class MeetingAdapter(
         private val tvLocation: TextView = itemView.findViewById(R.id.tvLocation)
         private val tvHostAvatar: TextView = itemView.findViewById(R.id.tvHostAvatar)
         private val tvPeopleCount: TextView = itemView.findViewById(R.id.tvPeopleCount)
-        private val tvFineBadge: TextView = itemView.findViewById(R.id.tvFineBadge)
 
         // meetings 테이블의 date("yyyy-MM-dd") + time("HH:mm")를 합쳐 파싱
         private val dateOnlyFormat = SimpleDateFormat("yyyy-MM-dd", Locale.KOREA)
@@ -57,13 +56,6 @@ class MeetingAdapter(
             tvLocation.text = "📍 ${meeting.locationName}"
             tvPeopleCount.text = "${meeting.joinedCount}/${meeting.maxPeople}명 참여중"
             tvHostAvatar.text = meeting.hostNickname.take(1)
-
-            if (meeting.fineAmount > 0) {
-                tvFineBadge.visibility = View.VISIBLE
-                tvFineBadge.text = "벌금 ${"%,d".format(meeting.fineAmount)}원"
-            } else {
-                tvFineBadge.visibility = View.GONE
-            }
 
             if (meeting.description.isNullOrBlank()) {
                 tvDescription.visibility = View.GONE
