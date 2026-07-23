@@ -14,7 +14,7 @@ class DBHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "runmate.db"
-        private const val DATABASE_VERSION = 2 // v2: meetings에 fine_amount, pace 컬럼 추가 (팀 확정)
+        private const val DATABASE_VERSION = 3 // v3: 벌금 제도 폐지로 meetings.fine_amount 컬럼 제거 (팀 확정)
 
         // 로그인/회원가입 화면이 아직 없어서, 지금은 항상 이 유저(id=1)로 동작합니다.
         // 로그인 기능이 붙으면 이 값을 실제 로그인한 유저 id로 바꿔주면 됩니다.
@@ -35,7 +35,7 @@ class DBHelper(context: Context) :
         )
 
         // meetings (모임)
-        // v2에서 fine_amount(노쇼 벌금액), pace(목표 페이스) 두 컬럼 추가 (팀 확정)
+        // v2에서 pace(목표 페이스) 컬럼 추가, v3에서 벌금 제도 폐지로 fine_amount 제거 (팀 확정)
         db.execSQL(
             """
             CREATE TABLE meetings (
@@ -51,7 +51,6 @@ class DBHelper(context: Context) :
                 is_public INTEGER NOT NULL DEFAULT 1,
                 invite_code TEXT,
                 description TEXT,
-                fine_amount INTEGER NOT NULL DEFAULT 0,
                 pace TEXT,
                 FOREIGN KEY(host_id) REFERENCES users(id)
             )
@@ -141,9 +140,9 @@ class DBHelper(context: Context) :
         db.execSQL(
             """
             INSERT INTO meetings
-                (host_id, title, date, time, location_name, lat, lng, max_people, is_public, description, fine_amount, pace)
+                (host_id, title, date, time, location_name, lat, lng, max_people, is_public, description, pace)
             VALUES
-                (1, '여의도 저녁 러닝', '2026-07-24', '19:30', '여의도한강공원', 37.5285, 126.9330, 6, 1, '가볍게 5km 뛰어요', 3000, '6~7')
+                (1, '여의도 저녁 러닝', '2026-07-24', '19:30', '여의도한강공원', 37.5285, 126.9330, 6, 1, '가볍게 5km 뛰어요', '6~7')
             """.trimIndent()
         )
         db.execSQL(
@@ -212,7 +211,7 @@ class DBHelper(context: Context) :
         val whereSql = if (whereClauses.isEmpty()) "" else "WHERE " + whereClauses.joinToString(" AND ")
 
         val query = """
-            SELECT m.id, m.title, m.date, m.time, m.location_name, m.description, m.max_people, m.is_public, m.fine_amount,
+            SELECT m.id, m.title, m.date, m.time, m.location_name, m.description, m.max_people, m.is_public,
                    u.nickname AS host_nickname,
                    (SELECT COUNT(*) FROM meeting_participants p WHERE p.meeting_id = m.id) AS joined_count
             FROM meetings m
@@ -235,8 +234,7 @@ class DBHelper(context: Context) :
                         maxPeople = getInt(getColumnIndexOrThrow("max_people")),
                         isPublic = getInt(getColumnIndexOrThrow("is_public")) == 1,
                         joinedCount = getInt(getColumnIndexOrThrow("joined_count")),
-                        hostNickname = getString(getColumnIndexOrThrow("host_nickname")) ?: "러너",
-                        fineAmount = getInt(getColumnIndexOrThrow("fine_amount"))
+                        hostNickname = getString(getColumnIndexOrThrow("host_nickname")) ?: "러너"
                     )
                 )
             }
@@ -247,7 +245,6 @@ class DBHelper(context: Context) :
 
     /**
      * 모임 만들기(#2) 화면에서 사용. meetings 테이블에 새 모임을 추가하고 새 id를 반환합니다.
-     * 노쇼 벌금액(fine_amount) 컬럼은 현재 확정된 스키마에 없어서 저장하지 않습니다.
      */
     fun insertMeeting(
         hostId: Int,
@@ -261,7 +258,6 @@ class DBHelper(context: Context) :
         isPublic: Boolean,
         inviteCode: String?,
         description: String?,
-        fineAmount: Int = 0,
         pace: String? = null
     ): Long {
         val db = writableDatabase
@@ -277,7 +273,6 @@ class DBHelper(context: Context) :
             put("is_public", if (isPublic) 1 else 0)
             put("invite_code", inviteCode)
             put("description", description)
-            put("fine_amount", fineAmount)
             put("pace", pace)
         }
         return db.insert("meetings", null, values)
@@ -290,7 +285,7 @@ class DBHelper(context: Context) :
         val db = readableDatabase
         val query = """
             SELECT m.id, m.host_id, m.title, m.date, m.time, m.location_name, m.description,
-                   m.max_people, m.is_public, m.fine_amount, m.pace,
+                   m.max_people, m.is_public, m.pace,
                    u.nickname AS host_nickname,
                    (SELECT COUNT(*) FROM meeting_participants p WHERE p.meeting_id = m.id) AS joined_count
             FROM meetings m
@@ -314,7 +309,6 @@ class DBHelper(context: Context) :
                     maxPeople = getInt(getColumnIndexOrThrow("max_people")),
                     isPublic = getInt(getColumnIndexOrThrow("is_public")) == 1,
                     joinedCount = getInt(getColumnIndexOrThrow("joined_count")),
-                    fineAmount = getInt(getColumnIndexOrThrow("fine_amount")),
                     pace = getString(getColumnIndexOrThrow("pace"))
                 )
             }
@@ -399,5 +393,15 @@ class DBHelper(context: Context) :
             put("status", "joined")
         }
         db.insert("meeting_participants", null, values)
+    }
+
+    /** 취소하기 버튼: meeting_participants에서 참여 기록 삭제 */
+    fun leaveMeeting(meetingId: Int, userId: Int) {
+        val db = writableDatabase
+        db.delete(
+            "meeting_participants",
+            "meeting_id = ? AND user_id = ?",
+            arrayOf(meetingId.toString(), userId.toString())
+        )
     }
 }

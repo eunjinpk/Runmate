@@ -128,7 +128,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
-                        android:text="⏰ 노쇼 벌금 3,000원 · 페이스 6~7'/km"
+                        android:text="⏰ 페이스 6~7'/km"
                         android:textColor="@color/text_primary"
                         android:textSize="14sp"
                         android:visibility="gone" />
@@ -187,6 +187,7 @@
 
     <!-- 하단 고정 버튼 영역 -->
     <LinearLayout
+        android:id="@+id/bottomButtonBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/surface_white"
@@ -195,17 +196,19 @@
         android:orientation="horizontal"
         android:padding="16dp">
 
+        <!-- 참여 전에는 숨겨짐. 참여 확정되면 "취소하기"로 나타남 -->
         <TextView
-            android:id="@+id/btnAttendanceCheck"
+            android:id="@+id/btnSecondary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="10dp"
             android:background="@drawable/bg_chip_unselected"
             android:gravity="center"
             android:padding="14dp"
-            android:text="🔒 출석체크"
-            android:textColor="@color/text_secondary"
-            android:textSize="14sp" />
+            android:text="취소하기"
+            android:textColor="@color/text_primary"
+            android:textSize="14sp"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/btnJoin"

@@ -46,12 +46,9 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var layoutLocationChips: LinearLayout
     private lateinit var etSearch: EditText
 
-    // 지하철역 근처 한강공원 칩 목록 (지도 기반 장소 검색 화면이 붙기 전까지는 하드코딩)
-    private val nearbyLocations = linkedMapOf(
-        "여의도" to "5호선",
-        "반포" to "9호선",
-        "뚝섬" to "7호선",
-        "잠실" to "2호선"
+    // 한강공원 전체 칩 목록 (지도 기반 장소 검색 화면이 붙기 전까지는 하드코딩)
+    private val nearbyLocations = listOf(
+        "여의도", "반포", "뚝섬", "잠실", "망원", "이촌", "잠원", "광나루", "난지", "양화", "강서"
     )
 
     private var selectedLocation: String? = "여의도" // 시안 기본값과 동일하게 여의도로 시작
@@ -80,7 +77,6 @@ class HomeActivity : AppCompatActivity() {
         layoutLocationChips = findViewById(R.id.layoutLocationChips)
         etSearch = findViewById(R.id.etSearch)
 
-        val tvNotificationBell = findViewById<TextView>(R.id.tvNotificationBell)
         val fabCreateMeeting = findViewById<ExtendedFloatingActionButton>(R.id.fabCreateMeeting)
 
         adapter = MeetingAdapter { meeting ->
@@ -109,12 +105,9 @@ class HomeActivity : AppCompatActivity() {
             refreshList(searchQuery = etSearch.text?.toString())
         }
 
-        tvNotificationBell.setOnClickListener {
-            Toast.makeText(this, "알림 (연결 예정)", Toast.LENGTH_SHORT).show()
-        }
-
         fabCreateMeeting.setOnClickListener {
-            startActivity(android.content.Intent(this, com.android.runmate.ui.meeting.CreateMeetingActivity::class.java))
+            // 시안 흐름: 모임 만들기 → 먼저 한강공원 선택(#6) → 러닝코스 추천(#6-2) → 모임 만들기(#4)
+            startActivity(android.content.Intent(this, com.android.runmate.ui.place.ParkSelectActivity::class.java))
         }
 
         setupBottomNav()
@@ -133,9 +126,9 @@ class HomeActivity : AppCompatActivity() {
     /** 지하철역 근처 한강공원 칩을 코드로 생성 (여의도/반포/뚝섬/잠실) */
     private fun buildLocationChips() {
         layoutLocationChips.removeAllViews()
-        nearbyLocations.forEach { (location, subwayLine) ->
+        nearbyLocations.forEach { location ->
             val chip = TextView(this).apply {
-                text = "$location $subwayLine"
+                text = location
                 textSize = 13f
                 setPadding(28, 16, 28, 16)
                 val params = LinearLayout.LayoutParams(
@@ -177,9 +170,6 @@ class HomeActivity : AppCompatActivity() {
             startActivity(
                 android.content.Intent(this, com.android.runmate.ui.place.ParkSelectActivity::class.java)
             )
-        }
-        findViewById<LinearLayout>(R.id.navChallenge).setOnClickListener {
-            Toast.makeText(this, "챌린지 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
         }
         findViewById<LinearLayout>(R.id.navRanking).setOnClickListener {
             Toast.makeText(this, "랭킹 화면 (연결 예정)", Toast.LENGTH_SHORT).show()

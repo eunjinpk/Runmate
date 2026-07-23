@@ -14,6 +14,5 @@ data class Meeting(
     val maxPeople: Int,
     val isPublic: Boolean,
     val joinedCount: Int,
-    val hostNickname: String,
-    val fineAmount: Int
+    val hostNickname: String
 )
