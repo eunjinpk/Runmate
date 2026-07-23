@@ -6,11 +6,11 @@ import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.android.runmate.R
 import com.android.runmate.data.RunningCourse
+import com.google.android.material.card.MaterialCardView
 
 class CourseAdapter(
     private val courses: List<RunningCourse>,
@@ -28,6 +28,7 @@ class CourseAdapter(
 
     override fun onBindViewHolder(holder: VH, position: Int) {
         val course = courses[position]
+        val isSelected = course.id == selectedId
 
         val tvLevel = holder.view.findViewById<TextView>(R.id.tvLevel)
         tvLevel.text = course.level
@@ -65,6 +66,17 @@ class CourseAdapter(
         holder.view.findViewById<TextView>(R.id.tvDistance).text = spannable
 
         holder.view.findViewById<TextView>(R.id.tvDescription).text = course.description
+
+        val card = holder.view.findViewById<MaterialCardView>(R.id.cardCourse)
+        if (isSelected) {
+            card.strokeColor = Color.parseColor("#2196F3")
+            card.strokeWidth = 4
+            card.setCardBackgroundColor(Color.parseColor("#F0F7FF"))
+        } else {
+            card.strokeColor = Color.parseColor("#EEEEEE")
+            card.strokeWidth = 3
+            card.setCardBackgroundColor(Color.WHITE)
+        }
 
         holder.view.setOnClickListener {
             selectedId = course.id

@@ -43,6 +43,11 @@ class CourseListActivity : AppCompatActivity() {
             intent.putExtra("location_name", park.name + " 한강공원")
             intent.putExtra("lat", park.lat)
             intent.putExtra("lng", park.lng)
+            selectedCourse?.let {
+                intent.putExtra("course_name", it.title)
+                intent.putExtra("course_level", it.level)
+                intent.putExtra("course_distance", it.distanceKm)
+            }
             startActivity(intent)
         }
     }
