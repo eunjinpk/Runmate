@@ -83,6 +83,14 @@
                         android:textSize="12sp" />
                 </LinearLayout>
 
+                <ImageView
+                    android:id="@+id/btnSettings"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:src="@android:drawable/ic_menu_manage"
+                    app:tint="@color/white" />
+
+
             </LinearLayout>
 
             <!-- 본문 -->

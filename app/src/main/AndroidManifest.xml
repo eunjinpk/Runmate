@@ -22,18 +22,6 @@
         </activity>
 
         <activity
-            android:name=".ui.home.HomeActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".ui.auth.LoginActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".ui.auth.SignupActivity"
-            android:exported="false" />
-
-        <activity
             android:name=".ui.place.ParkSelectActivity"
             android:exported="false" />
 
@@ -51,6 +39,14 @@
 
         <activity
             android:name=".MyPageActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ProfileSettingsActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".CustomerServiceActivity"
             android:exported="false" />
 
     </application>
