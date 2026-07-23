@@ -9,8 +9,7 @@ class DBHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "runmate.db"
-        private const val DATABASE_VERSION = 2 // v2: meetings에 fine_amount, pace 컬럼 추가 (팀 확정)
-
+        private const val DATABASE_VERSION = 2 // v3: users에 default_park 컬럼 추가 (마이페이지 담당)
         // 로그인/회원가입 화면이 아직 없어서, 지금은 항상 이 유저(id=1)로 동작합니다.
         // 로그인 기능이 붙으면 이 값을 실제 로그인한 유저 id로 바꿔주면 됩니다.
         const val CURRENT_USER_ID = 1
@@ -25,6 +24,7 @@ class DBHelper(context: Context) :
                 nickname TEXT NOT NULL,
                 level TEXT NOT NULL DEFAULT '초보',
                 profile_img TEXT
+                
             )
             """.trimIndent()
         )

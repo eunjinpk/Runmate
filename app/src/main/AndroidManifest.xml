@@ -37,6 +37,9 @@
             android:name=".ui.meeting.MeetingDetailActivity"
             android:exported="false" />
 
+        <activity android:name=".ProfileSettingsActivity" />
+        <activity android:name=".CustomerServiceActivity" />
+
     </application>
 
 </manifest>
