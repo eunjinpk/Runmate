@@ -4,6 +4,11 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
+/**
+ * 1차 회의에서 확정한 6개 테이블 구조를 그대로 반영한 DBHelper입니다.
+ * 컬럼명은 회의록 기준으로 임의 변경 없이 작성했습니다.
+ * 팀원들이 각자 화면을 만들 때 이 클래스를 공용으로 사용하면 됩니다.
+ */
 class DBHelper(context: Context) :
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
@@ -207,7 +212,7 @@ class DBHelper(context: Context) :
         val whereSql = if (whereClauses.isEmpty()) "" else "WHERE " + whereClauses.joinToString(" AND ")
 
         val query = """
-            SELECT m.id, m.title, m.date, m.time, m.location_name, m.description, m.max_people, m.is_public,
+            SELECT m.id, m.title, m.date, m.time, m.location_name, m.description, m.max_people, m.is_public, m.fine_amount,
                    u.nickname AS host_nickname,
                    (SELECT COUNT(*) FROM meeting_participants p WHERE p.meeting_id = m.id) AS joined_count
             FROM meetings m
@@ -230,7 +235,8 @@ class DBHelper(context: Context) :
                         maxPeople = getInt(getColumnIndexOrThrow("max_people")),
                         isPublic = getInt(getColumnIndexOrThrow("is_public")) == 1,
                         joinedCount = getInt(getColumnIndexOrThrow("joined_count")),
-                        hostNickname = getString(getColumnIndexOrThrow("host_nickname")) ?: "러너"
+                        hostNickname = getString(getColumnIndexOrThrow("host_nickname")) ?: "러너",
+                        fineAmount = getInt(getColumnIndexOrThrow("fine_amount"))
                     )
                 )
             }
