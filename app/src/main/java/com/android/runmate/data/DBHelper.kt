@@ -14,22 +14,25 @@ class DBHelper(context: Context) :
 
     companion object {
         private const val DATABASE_NAME = "runmate.db"
-        private const val DATABASE_VERSION = 3 // v3: 벌금 제도 폐지로 meetings.fine_amount 컬럼 제거 (팀 확정)
+        private const val DATABASE_VERSION = 4 // v4: 로그인 기능 위해 users에 username, password 컬럼 추가
 
-        // 로그인/회원가입 화면이 아직 없어서, 지금은 항상 이 유저(id=1)로 동작합니다.
-        // 로그인 기능이 붙으면 이 값을 실제 로그인한 유저 id로 바꿔주면 됩니다.
-        const val CURRENT_USER_ID = 1
+        // 로그인 성공 시 이 값을 실제 로그인한 유저 id로 바꿔줍니다 (SessionManager와 함께 씁니다).
+        // 아직 로그인 안 한 상태(스플래시 최초 실행 등)의 기본값은 1입니다.
+        var CURRENT_USER_ID = 1
     }
 
     override fun onCreate(db: SQLiteDatabase) {
         // users (유저)
+        // v4에서 로그인용 username(아이디), password 컬럼 추가
         db.execSQL(
             """
             CREATE TABLE users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 nickname TEXT NOT NULL,
                 level TEXT NOT NULL DEFAULT '초보',
-                profile_img TEXT
+                profile_img TEXT,
+                username TEXT UNIQUE,
+                password TEXT
             )
             """.trimIndent()
         )
@@ -410,5 +413,46 @@ class DBHelper(context: Context) :
         val db = writableDatabase
         db.delete("meeting_participants", "meeting_id = ?", arrayOf(meetingId.toString()))
         db.delete("meetings", "id = ?", arrayOf(meetingId.toString()))
+    }
+
+    /** 이미 쓰이고 있는 아이디인지 확인 (회원가입 화면 중복체크용) */
+    fun isUsernameTaken(username: String): Boolean {
+        val db = readableDatabase
+        val cursor = db.rawQuery("SELECT id FROM users WHERE username = ?", arrayOf(username))
+        val exists = cursor.moveToFirst()
+        cursor.close()
+        return exists
+    }
+
+    /**
+     * 회원가입: users 테이블에 새 유저 추가하고 새 id를 반환합니다.
+     * 비밀번호는 학교 과제 범위라 평문 저장입니다 (실제 서비스라면 해시 처리 필요).
+     */
+    fun registerUser(nickname: String, username: String, password: String): Long {
+        val db = writableDatabase
+        val values = android.content.ContentValues().apply {
+            put("nickname", nickname)
+            put("username", username)
+            put("password", password)
+            put("level", "초보")
+        }
+        return db.insert("users", null, values)
+    }
+
+    /**
+     * 로그인: 아이디/비밀번호가 맞으면 유저 id를 반환하고, 안 맞으면 null을 반환합니다.
+     */
+    fun login(username: String, password: String): Int? {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT id FROM users WHERE username = ? AND password = ?",
+            arrayOf(username, password)
+        )
+        var userId: Int? = null
+        if (cursor.moveToFirst()) {
+            userId = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
+        }
+        cursor.close()
+        return userId
     }
 }

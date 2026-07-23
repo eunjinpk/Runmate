@@ -258,6 +258,19 @@
                     android:layout_marginTop="12dp"
                     android:visibility="gone" />
 
+                <!-- 로그아웃 -->
+                <TextView
+                    android:id="@+id/btnLogout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="32dp"
+                    android:background="@drawable/bg_stat_card"
+                    android:gravity="center"
+                    android:padding="14dp"
+                    android:text="로그아웃"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="14sp" />
+
             </LinearLayout>
         </LinearLayout>
     </ScrollView>
