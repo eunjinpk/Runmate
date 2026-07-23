@@ -7,8 +7,9 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.android.runmate.R
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.CornerFamily
@@ -41,10 +42,63 @@ class RankingActivity : AppCompatActivity() {
 
         layoutRankList = findViewById(R.id.layoutRankList)
 
+        applyBottomNavInsets()
         bindPodium()
         bindRankList()
         bindMyRank()
-        setupBottomNav()        // ← 이 줄 추가
+        setupBottomNav()
+    }
+
+    /** 홈 화면과 동일하게 시스템 내비게이션 바 높이만큼 여백 주기 */
+    private fun applyBottomNavInsets() {
+        val navBar = findViewById<LinearLayout>(R.id.bottomNavBar) ?: return
+        val basePadding = navBar.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(navBar) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(
+                view.paddingLeft,
+                view.paddingTop,
+                view.paddingRight,
+                basePadding + systemBars.bottom
+            )
+            insets
+        }
+    }
+
+    /** 하단 네비게이션 */
+    private fun setupBottomNav() {
+        // 홈 화면으로 이동
+        findViewById<LinearLayout>(R.id.navHome)?.setOnClickListener {
+            val intent = android.content.Intent(
+                this,
+                com.android.runmate.ui.home.HomeActivity::class.java
+            )
+            // 이미 떠 있는 홈 화면을 재사용 (화면이 계속 쌓이는 것 방지)
+            intent.flags = android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
+            startActivity(intent)
+            finish()
+        }
+
+        // 장소 화면으로 이동
+        findViewById<LinearLayout>(R.id.navPlace)?.setOnClickListener {
+            startActivity(
+                android.content.Intent(
+                    this,
+                    com.android.runmate.ui.place.ParkSelectActivity::class.java
+                )
+            )
+        }
+
+        // 이미 랭킹 화면이라 아무 동작 없음
+        findViewById<LinearLayout>(R.id.navRanking)?.setOnClickListener { }
+
+        // 마이페이지로 이동
+        findViewById<LinearLayout>(R.id.navMy)?.setOnClickListener {
+            startActivity(
+                android.content.Intent(this, com.android.runmate.MyPageActivity::class.java)
+            )
+        }
     }
 
     /** 상위 3명 시상대 */
@@ -52,9 +106,6 @@ class RankingActivity : AppCompatActivity() {
         setPodium(honorList.getOrNull(0), R.id.tvFirstName, R.id.tvFirstRank, R.id.tvFirstRate)
         setPodium(honorList.getOrNull(1), R.id.tvSecondName, R.id.tvSecondRank, R.id.tvSecondRate)
         setPodium(honorList.getOrNull(2), R.id.tvThirdName, R.id.tvThirdRank, R.id.tvThirdRate)
-
-        // TODO: 실제 프로필 사진이 생기면 아래처럼 교체
-        // findViewById<ShapeableImageView>(R.id.ivFirst).setImageURI(사진주소)
     }
 
     private fun setPodium(runner: Runner?, nameId: Int, rankId: Int, rateId: Int) {
@@ -166,24 +217,6 @@ class RankingActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvMyRate).text = "${myRank.rate}%"
     }
 
-    /** 하단 네비게이션 */
-    private fun setupBottomNav() {
-        findViewById<LinearLayout>(R.id.navHome).setOnClickListener {
-            finish()   // 홈에서 넘어왔으므로 닫으면 홈으로 돌아감
-        }
-        findViewById<LinearLayout>(R.id.navRanking).setOnClickListener {
-            // 이미 랭킹 화면이라 아무 동작 없음
-        }
-        findViewById<LinearLayout>(R.id.navPlace).setOnClickListener {
-            Toast.makeText(this, "장소 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
-        }
-        findViewById<LinearLayout>(R.id.navChallenge).setOnClickListener {
-            Toast.makeText(this, "챌린지 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
-        }
-        findViewById<LinearLayout>(R.id.navMy).setOnClickListener {
-            Toast.makeText(this, "마이페이지 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
-        }
-    }
     /** dp → px 변환 */
     private fun dp(value: Int): Int =
         (value * resources.displayMetrics.density).toInt()

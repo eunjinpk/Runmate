@@ -174,7 +174,12 @@ class HomeActivity : AppCompatActivity() {
             )
         }
         findViewById<LinearLayout>(R.id.navRanking).setOnClickListener {
-            startActivity(Intent(this, RankingActivity::class.java))
+            startActivity(
+                android.content.Intent(
+                    this,
+                    com.android.runmate.ui.ranking.RankingActivity::class.java
+                )
+            )
         }
         findViewById<LinearLayout>(R.id.navMy).setOnClickListener {
             // MyPageActicity는 com.android.runmate 최상위 패키지에 있음 (MainActivity랑 같은 위치)
