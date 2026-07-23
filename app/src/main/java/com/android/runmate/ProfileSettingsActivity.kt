@@ -54,10 +54,6 @@ class ProfileSettingsActivity : AppCompatActivity() {
         findViewById<LinearLayout>(R.id.rowCustomerService).setOnClickListener {
             startActivity(Intent(this, CustomerServiceActivity::class.java))
         }
-
-        findViewById<TextView>(R.id.tvLogout).setOnClickListener {
-            Toast.makeText(this, "로그아웃 되었습니다", Toast.LENGTH_SHORT).show()
-        }
     }
 
     private fun loadProfile(etNickname: EditText, tvProfileInitial: TextView) {

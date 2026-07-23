@@ -83,14 +83,13 @@
                         android:textSize="12sp" />
                 </LinearLayout>
 
+                <!-- 정보수정(설정) 버튼: ProfileSettingsActivity로 이동 -->
                 <ImageView
                     android:id="@+id/btnSettings"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@android:drawable/ic_menu_manage"
                     app:tint="@color/white" />
-
-
             </LinearLayout>
 
             <!-- 본문 -->
@@ -285,6 +284,7 @@
 
     <!-- 하단 탭바: 홈/장소/랭킹/마이 -->
     <LinearLayout
+        android:id="@+id/bottomNavBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/surface_white"
