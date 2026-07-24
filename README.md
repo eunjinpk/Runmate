@@ -97,7 +97,7 @@
 | start_date, end_date | 기간 |
 | description	| 설명 |
 
-### `diet_records (식단 인증)` — 스키마만 존재, 화면 미구현
+### `diet_records` (식단 인증) — 스키마만 존재, 화면 미구현
 
 | 컬럼 | 설명 |
 |---|---|
