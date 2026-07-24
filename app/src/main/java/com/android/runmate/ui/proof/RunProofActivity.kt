@@ -61,6 +61,14 @@ class RunProofActivity : AppCompatActivity() {
         dbHelper = DBHelper(this)
         meetingId = intent.getIntExtra(EXTRA_MEETING_ID, -1)
 
+        // 이미 인증 완료한 모임이면 중복 인증 못 하게 화면 진입 자체를 막음
+        // (모임상세 "종료하기"랑 마이페이지 "러닝인증하기" 두 입구 다 여기로 들어오니 여기서 막으면 둘 다 막힘)
+        if (meetingId != -1 && dbHelper.hasSubmittedRunningRecord(meetingId, DBHelper.CURRENT_USER_ID)) {
+            Toast.makeText(this, "이미 인증을 완료한 러닝이에요", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
         etDistance = findViewById(R.id.etDistance)
         etTime = findViewById(R.id.etTime)
         etPace = findViewById(R.id.etPace)

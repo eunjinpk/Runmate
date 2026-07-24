@@ -2,6 +2,8 @@ package com.android.runmate
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -9,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.runmate.data.DBHelper
 import com.android.runmate.ui.auth.LoginActivity
@@ -34,6 +37,7 @@ class MyPageActivity : AppCompatActivity() {
         loadProfile()
         loadStats()
         setupPhotoGrid()
+        loadHistory()
 
         // 정보수정(설정) 버튼 → ProfileSettingsActivity로 이동
         findViewById<ImageView>(R.id.btnSettings).setOnClickListener {
@@ -66,18 +70,26 @@ class MyPageActivity : AppCompatActivity() {
     private fun openRunProofPicker() {
         val dbHelper = DBHelper(this)
         val joinedMeetings = dbHelper.getJoinedMeetingsForUser(currentUserId)
+        // 이미 인증 완료한 모임은 다시 인증 못 하도록 목록에서 제외
+        val notYetCertified = joinedMeetings.filter { (meetingId, _) ->
+            !dbHelper.hasSubmittedRunningRecord(meetingId, currentUserId)
+        }
 
         if (joinedMeetings.isEmpty()) {
             android.widget.Toast.makeText(this, "참여한 모임이 없어요. 먼저 모임에 참여해주세요!", android.widget.Toast.LENGTH_SHORT).show()
             return
         }
+        if (notYetCertified.isEmpty()) {
+            android.widget.Toast.makeText(this, "참여한 모임을 모두 인증했어요!", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
 
-        val titles = joinedMeetings.map { it.second }.toTypedArray()
+        val titles = notYetCertified.map { it.second }.toTypedArray()
 
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("어느 러닝을 인증할까요?")
             .setItems(titles) { _, index ->
-                val (meetingId, meetingTitle) = joinedMeetings[index]
+                val (meetingId, meetingTitle) = notYetCertified[index]
                 val intent = Intent(this, com.android.runmate.ui.proof.RunProofActivity::class.java)
                 intent.putExtra(com.android.runmate.ui.proof.RunProofActivity.EXTRA_MEETING_ID, meetingId)
                 intent.putExtra(com.android.runmate.ui.proof.RunProofActivity.EXTRA_MEETING_NAME, meetingTitle)
@@ -89,9 +101,10 @@ class MyPageActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        // 정보수정 화면 등 다녀온 뒤 최신 정보로 다시 불러오기
+        // 정보수정 화면, 러닝인증 화면 등 다녀온 뒤 최신 정보로 다시 불러오기
         loadProfile()
         loadStats()
+        loadHistory()
     }
 
     /** 로그아웃: 세션 지우고 로그인 화면으로 이동, 뒤로가기로 다시 못 돌아오게 스택 정리 */
@@ -104,6 +117,70 @@ class MyPageActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
+
+    /** 러닝 인증을 완료한 모임들을 "최근 참여 이력"에 표시 */
+    private fun loadHistory() {
+        val dbHelper = DBHelper(this)
+        val history = dbHelper.getRunningHistoryForUser(currentUserId)
+
+        val tvHistoryEmpty = findViewById<TextView>(R.id.tvHistoryEmpty)
+        val recyclerHistory = findViewById<RecyclerView>(R.id.recyclerHistory)
+
+        if (history.isEmpty()) {
+            tvHistoryEmpty.visibility = View.VISIBLE
+            recyclerHistory.visibility = View.GONE
+        } else {
+            tvHistoryEmpty.visibility = View.GONE
+            recyclerHistory.visibility = View.VISIBLE
+            recyclerHistory.layoutManager = LinearLayoutManager(this)
+            recyclerHistory.adapter = HistoryAdapter(history)
+        }
+    }
+
+    /** 참여 이력 한 줄(모임명 · 날짜 · 거리)을 코드로 그리는 간단한 어댑터 */
+    private inner class HistoryAdapter(
+        private val items: List<Triple<String, String, Double>>
+    ) : RecyclerView.Adapter<HistoryAdapter.RowHolder>() {
+
+        inner class RowHolder(val root: LinearLayout) : RecyclerView.ViewHolder(root)
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RowHolder {
+            val row = LinearLayout(parent.context).apply {
+                orientation = LinearLayout.VERTICAL
+                setPadding(dp(14), dp(12), dp(14), dp(12))
+                setBackgroundResource(R.drawable.bg_stat_card)
+                layoutParams = RecyclerView.LayoutParams(
+                    RecyclerView.LayoutParams.MATCH_PARENT,
+                    RecyclerView.LayoutParams.WRAP_CONTENT
+                ).apply { bottomMargin = dp(8) }
+            }
+            row.addView(TextView(parent.context).apply {
+                id = View.generateViewId()
+                textSize = 14f
+                setTextColor(getColor(R.color.text_primary))
+                setTypeface(typeface, android.graphics.Typeface.BOLD)
+            })
+            row.addView(TextView(parent.context).apply {
+                id = View.generateViewId()
+                textSize = 12f
+                setTextColor(getColor(R.color.text_secondary))
+                setPadding(0, dp(4), 0, 0)
+            })
+            return RowHolder(row)
+        }
+
+        override fun onBindViewHolder(holder: RowHolder, position: Int) {
+            val (title, date, distance) = items[position]
+            val titleView = holder.root.getChildAt(0) as TextView
+            val subView = holder.root.getChildAt(1) as TextView
+            titleView.text = title
+            subView.text = "$date · ${distance}km"
+        }
+
+        override fun getItemCount(): Int = items.size
+    }
+
+    private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
     private fun setupPhotoGrid() {
         val dummyPhotos = listOf(
