@@ -50,8 +50,7 @@ class MyPageActivity : AppCompatActivity() {
             startActivity(Intent(this, com.android.runmate.ui.place.ParkSelectActivity::class.java))
         }
         findViewById<LinearLayout>(R.id.navRanking).setOnClickListener {
-            // TODO: 랭킹 화면 완성되면 연결
-            android.widget.Toast.makeText(this, "랭킹 화면 (연결 예정)", android.widget.Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, com.android.runmate.ui.ranking.RankingActivity::class.java))
         }
 
         findViewById<TextView>(R.id.btnLogout).setOnClickListener {

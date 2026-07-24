@@ -7,8 +7,9 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import com.android.runmate.R
 import com.google.android.material.imageview.ShapeableImageView
 import com.google.android.material.shape.CornerFamily
@@ -39,12 +40,21 @@ class RankingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ranking)
 
+        // 3버튼 내비게이션 등 시스템 내비게이션 바가 하단 탭바랑 안 겹치도록 여백 처리
+        val bottomNavBar = findViewById<LinearLayout>(R.id.bottomNavBar)
+        val bottomNavBarBasePadding = bottomNavBar.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(bottomNavBar) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(view.paddingLeft, view.paddingTop, view.paddingRight, bottomNavBarBasePadding + systemBars.bottom)
+            insets
+        }
+
         layoutRankList = findViewById(R.id.layoutRankList)
 
         bindPodium()
         bindRankList()
         bindMyRank()
-        setupBottomNav()        // ← 이 줄 추가
+        setupBottomNav()
     }
 
     /** 상위 3명 시상대 */
@@ -175,13 +185,10 @@ class RankingActivity : AppCompatActivity() {
             // 이미 랭킹 화면이라 아무 동작 없음
         }
         findViewById<LinearLayout>(R.id.navPlace).setOnClickListener {
-            Toast.makeText(this, "장소 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
-        }
-        findViewById<LinearLayout>(R.id.navChallenge).setOnClickListener {
-            Toast.makeText(this, "챌린지 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
+            startActivity(android.content.Intent(this, com.android.runmate.ui.place.ParkSelectActivity::class.java))
         }
         findViewById<LinearLayout>(R.id.navMy).setOnClickListener {
-            Toast.makeText(this, "마이페이지 화면 (연결 예정)", Toast.LENGTH_SHORT).show()
+            startActivity(android.content.Intent(this, com.android.runmate.MyPageActivity::class.java))
         }
     }
     /** dp → px 변환 */
