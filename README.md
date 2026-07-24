@@ -87,6 +87,25 @@
 | distance, time | 거리/시간 |
 | date | 날짜 |
 
+### `diet_challenges` (식단 챌린지) — 스키마만 존재, 화면 미구현
+
+| 컬럼 | 설명 |
+|---|---|
+| id | PK |
+| creator_id | 개설자 (users FK) |
+| title |	챌린지 이름 |
+| start_date, end_date | 기간 |
+| description	| 설명 |
+
+### 'diet_records (식단 인증)` — 스키마만 존재, 화면 미구현
+
+| 컬럼 | 설명 |
+|---|---|
+| id	| PK |
+| challenge_id, user_id |	FK |
+| photo_path	| 인증 사진 |
+| memo	| 메모 |
+| date	| 날짜 |
 
 ---
 
