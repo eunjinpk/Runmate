@@ -189,6 +189,15 @@ class MeetingDetailActivity : AppCompatActivity() {
                     intent.putExtra(com.android.runmate.ui.proof.RunProofActivity.EXTRA_MEETING_NAME, meeting.title)
                     startActivity(intent)
                 }
+
+                // 이미 러닝 인증을 완료한 모임이면 종료하기 버튼 비활성화
+                if (dbHelper.hasSubmittedRunningRecord(meeting.id, DBHelper.CURRENT_USER_ID)) {
+                    btnJoin.text = "인증 완료"
+                    btnJoin.isEnabled = false
+                    btnJoin.setBackgroundResource(R.drawable.bg_chip_unselected)
+                    btnJoin.setTextColor(getColor(R.color.text_secondary))
+                    btnJoin.setOnClickListener(null)
+                }
             }
             spotsLeft <= 0 -> {
                 btnSecondary.visibility = View.GONE

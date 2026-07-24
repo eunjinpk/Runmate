@@ -509,4 +509,47 @@ class DBHelper(context: Context) :
         }
         return db.insert("running_records", null, values)
     }
+
+    /** 이 유저가 이 모임의 러닝 인증을 이미 했는지 확인 (모임상세 종료하기 버튼 비활성화용) */
+    fun hasSubmittedRunningRecord(meetingId: Int, userId: Int): Boolean {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT id FROM running_records WHERE meeting_id = ? AND user_id = ?",
+            arrayOf(meetingId.toString(), userId.toString())
+        )
+        val exists = cursor.moveToFirst()
+        cursor.close()
+        return exists
+    }
+
+    /**
+     * 마이페이지 "최근 참여 이력"에서 사용.
+     * 이 유저가 러닝 인증을 완료한 모임 목록을 (모임명, 날짜, 거리) 형태로 반환합니다.
+     * 최신 인증이 위로 오도록 날짜 역순 정렬.
+     */
+    fun getRunningHistoryForUser(userId: Int): List<Triple<String, String, Double>> {
+        val db = readableDatabase
+        val query = """
+            SELECT m.title, r.date, r.distance
+            FROM running_records r
+            JOIN meetings m ON m.id = r.meeting_id
+            WHERE r.user_id = ?
+            ORDER BY r.date DESC
+        """.trimIndent()
+
+        val cursor = db.rawQuery(query, arrayOf(userId.toString()))
+        val list = mutableListOf<Triple<String, String, Double>>()
+        cursor.use {
+            while (it.moveToNext()) {
+                list.add(
+                    Triple(
+                        it.getString(it.getColumnIndexOrThrow("title")),
+                        it.getString(it.getColumnIndexOrThrow("date")),
+                        it.getDouble(it.getColumnIndexOrThrow("distance"))
+                    )
+                )
+            }
+        }
+        return list
+    }
 }
