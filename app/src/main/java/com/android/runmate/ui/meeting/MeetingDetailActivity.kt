@@ -1,6 +1,7 @@
 package com.android.runmate.ui.meeting
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
@@ -182,7 +183,8 @@ class MeetingDetailActivity : AppCompatActivity() {
                 btnJoin.setBackgroundResource(R.drawable.bg_chip_selected)
                 btnJoin.setTextColor(getColor(R.color.surface_white))
                 btnJoin.setOnClickListener {
-                    val intent = android.content.Intent(this, com.android.runmate.ui.proof.RunProofActivity::class.java)
+                    // 러닝 인증 화면(#7)으로 이동
+                    val intent = Intent(this, com.android.runmate.ui.proof.RunProofActivity::class.java)
                     intent.putExtra(com.android.runmate.ui.proof.RunProofActivity.EXTRA_MEETING_ID, meeting.id)
                     intent.putExtra(com.android.runmate.ui.proof.RunProofActivity.EXTRA_MEETING_NAME, meeting.title)
                     startActivity(intent)

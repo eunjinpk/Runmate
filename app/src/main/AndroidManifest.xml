@@ -63,10 +63,15 @@
 
         <activity
             android:name=".ui.proof.RunProofActivity"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
 
         <activity
             android:name=".PhotoGalleryActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".ui.privatejoin.PrivateJoinActivity"
             android:exported="false" />
 
         <provider

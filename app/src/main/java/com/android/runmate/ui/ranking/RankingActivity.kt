@@ -40,21 +40,65 @@ class RankingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_ranking)
 
-        // 3버튼 내비게이션 등 시스템 내비게이션 바가 하단 탭바랑 안 겹치도록 여백 처리
-        val bottomNavBar = findViewById<LinearLayout>(R.id.bottomNavBar)
-        val bottomNavBarBasePadding = bottomNavBar.paddingBottom
-        ViewCompat.setOnApplyWindowInsetsListener(bottomNavBar) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            view.setPadding(view.paddingLeft, view.paddingTop, view.paddingRight, bottomNavBarBasePadding + systemBars.bottom)
-            insets
-        }
-
         layoutRankList = findViewById(R.id.layoutRankList)
 
+        applyBottomNavInsets()
         bindPodium()
         bindRankList()
         bindMyRank()
         setupBottomNav()
+    }
+
+    /** 홈 화면과 동일하게 시스템 내비게이션 바 높이만큼 여백 주기 */
+    private fun applyBottomNavInsets() {
+        val navBar = findViewById<LinearLayout>(R.id.bottomNavBar) ?: return
+        val basePadding = navBar.paddingBottom
+        ViewCompat.setOnApplyWindowInsetsListener(navBar) { view, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            view.setPadding(
+                view.paddingLeft,
+                view.paddingTop,
+                view.paddingRight,
+                basePadding + systemBars.bottom
+            )
+            insets
+        }
+    }
+
+    /** 하단 네비게이션 */
+    private fun setupBottomNav() {
+        // 홈 화면으로 이동
+        findViewById<LinearLayout>(R.id.navHome)?.setOnClickListener {
+            val intent = android.content.Intent(
+                this,
+                com.android.runmate.ui.home.HomeActivity::class.java
+            )
+            // 이미 떠 있는 홈 화면을 재사용 (화면이 계속 쌓이는 것 방지)
+            intent.flags = android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
+            startActivity(intent)
+            finish()
+        }
+
+        // 장소 화면으로 이동
+        findViewById<LinearLayout>(R.id.navPlace)?.setOnClickListener {
+            startActivity(
+                android.content.Intent(
+                    this,
+                    com.android.runmate.ui.place.ParkSelectActivity::class.java
+                )
+            )
+        }
+
+        // 이미 랭킹 화면이라 아무 동작 없음
+        findViewById<LinearLayout>(R.id.navRanking)?.setOnClickListener { }
+
+        // 마이페이지로 이동
+        findViewById<LinearLayout>(R.id.navMy)?.setOnClickListener {
+            startActivity(
+                android.content.Intent(this, com.android.runmate.MyPageActivity::class.java)
+            )
+        }
     }
 
     /** 상위 3명 시상대 */
@@ -62,9 +106,6 @@ class RankingActivity : AppCompatActivity() {
         setPodium(honorList.getOrNull(0), R.id.tvFirstName, R.id.tvFirstRank, R.id.tvFirstRate)
         setPodium(honorList.getOrNull(1), R.id.tvSecondName, R.id.tvSecondRank, R.id.tvSecondRate)
         setPodium(honorList.getOrNull(2), R.id.tvThirdName, R.id.tvThirdRank, R.id.tvThirdRate)
-
-        // TODO: 실제 프로필 사진이 생기면 아래처럼 교체
-        // findViewById<ShapeableImageView>(R.id.ivFirst).setImageURI(사진주소)
     }
 
     private fun setPodium(runner: Runner?, nameId: Int, rankId: Int, rateId: Int) {
@@ -176,21 +217,6 @@ class RankingActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.tvMyRate).text = "${myRank.rate}%"
     }
 
-    /** 하단 네비게이션 */
-    private fun setupBottomNav() {
-        findViewById<LinearLayout>(R.id.navHome).setOnClickListener {
-            finish()   // 홈에서 넘어왔으므로 닫으면 홈으로 돌아감
-        }
-        findViewById<LinearLayout>(R.id.navRanking).setOnClickListener {
-            // 이미 랭킹 화면이라 아무 동작 없음
-        }
-        findViewById<LinearLayout>(R.id.navPlace).setOnClickListener {
-            startActivity(android.content.Intent(this, com.android.runmate.ui.place.ParkSelectActivity::class.java))
-        }
-        findViewById<LinearLayout>(R.id.navMy).setOnClickListener {
-            startActivity(android.content.Intent(this, com.android.runmate.MyPageActivity::class.java))
-        }
-    }
     /** dp → px 변환 */
     private fun dp(value: Int): Int =
         (value * resources.displayMetrics.density).toInt()
