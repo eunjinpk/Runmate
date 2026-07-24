@@ -458,6 +458,34 @@ class DBHelper(context: Context) :
     }
 
     /**
+     * 마이페이지에서 "러닝인증하기" 버튼 눌렀을 때 사용.
+     * 이 유저가 참여한 모임 목록을 (id, 제목) 쌍으로 반환합니다.
+     * 최신 모임이 위로 오도록 날짜/시간 역순 정렬.
+     */
+    fun getJoinedMeetingsForUser(userId: Int): List<Pair<Int, String>> {
+        val db = readableDatabase
+        val query = """
+            SELECT m.id, m.title
+            FROM meetings m
+            JOIN meeting_participants p ON p.meeting_id = m.id
+            WHERE p.user_id = ?
+            ORDER BY m.date DESC, m.time DESC
+        """.trimIndent()
+
+        val cursor = db.rawQuery(query, arrayOf(userId.toString()))
+        val list = mutableListOf<Pair<Int, String>>()
+        cursor.use {
+            while (it.moveToNext()) {
+                list.add(
+                    it.getInt(it.getColumnIndexOrThrow("id")) to
+                            it.getString(it.getColumnIndexOrThrow("title"))
+                )
+            }
+        }
+        return list
+    }
+
+    /**
      * 러닝 인증 저장: running_records 테이블에 기록을 추가합니다.
      * 페이스/한줄소감은 현재 확정된 running_records 스키마(photo_path, distance, time, date)에
      * 컬럼이 없어서 저장하지 않습니다. 필요하면 팀 확인 후 컬럼 추가하면 됩니다.
