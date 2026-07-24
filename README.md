@@ -10,8 +10,11 @@
 
 - **모임 관리**: 러닝 모임 생성/참여, 공개·비공개 모임 (초대코드 지원)
 - **한강공원 지도**: 서울 11개 한강공원 정보 및 레벨별 추천 코스
-- **러닝 인증**: 사진 업로드 기반 러닝 기록 (거리·시간·페이스)
-- **마이페이지**: 개인 러닝 통계, 참여 이력, 랭킹
+- **러닝 인증**: 사진 업로드 기반 러닝 기록 (거리·시간·페이스), 마이페이지에서 참여 모임 선택 후 바로 인증도 가능
+- **로그인/회원가입**: 아이디·비밀번호 기반 로그인, 세션 유지
+- **마이페이지**: 개인 러닝 통계, 인증 사진 모아보기, 최근 참여 이력(인증 완료한 모임만 표시), 프로필/설정
+- **랭킹**: 이번 달 참여 랭킹, 명예의 전당
+
 
 ---
 
@@ -28,10 +31,10 @@
 
 | 담당 | 역할 | 주요 화면 |
 |---|---|---|
-| ① 홈/모임 | 홈 화면(모임 리스트), 모임 만들기, 모임 상세, 참여/신청 로직 | 홈, 모임 만들기, 모임 상세 |
+| ① 홈/모임 | 홈 화면(모임 리스트), 모임 만들기, 모임 상세, 참여/신청 로직, 로그인/회원가입/스플래시 | 홈, 모임 만들기, 모임 상세, 로그인, 회원가입, 스플래시 |
 | ② 지도/장소 | 장소 검색, 정적 지도 이미지 연동 | 한강공원 선택, 러닝코스 추천 |
-| ③ 러닝 인증 | 러닝 인증 화면, 사진 업로드, 거리·시간 기록 | 러닝 인증 |
-| ④ 마이페이지 | 마이페이지(통계), 프로필/설정 | 마이페이지 |
+| ③ 러닝 인증 | 러닝 인증 화면, 사진 업로드, 거리·시간 기록, 랭킹 | 러닝 인증, 랭킹 |
+| ④ 마이페이지 | 마이페이지(통계), 프로필/설정 | 마이페이지, 프로필 설정, 사진 갤러리 |
 
 ---
 
@@ -47,7 +50,7 @@
 | nickname | 닉네임 |
 | level | 러닝 레벨 (초보/중급/고수) |
 | profile_img | 프로필 이미지 경로 |
-| username | id |
+| username | 로그인 아이디 |
 | password | 비밀번호 |
 
 ### `meetings` (모임)
@@ -92,7 +95,7 @@
 - `main` : 배포/통합 기준 브랜치
 - `feature/home` : 홈/모임 담당
 - `feature/place` : 지도/장소 담당
-- `feature/running` : 러닝 인증 담당
+- `feature/running` : 러닝 인증/랭킹 담당
 - `feature/diet` : 마이페이지 담당
 
 각자 담당 브랜치에서 작업 후 Pull Request를 통해 `main`에 병합합니다.
@@ -103,14 +106,21 @@
 
 ```
 com.android.runmate
-├── data           // DBHelper, 데이터 모델, Repository
+├── data                    // DBHelper, 데이터 모델(Meeting, MeetingDetail 등), PlaceRepository
 ├── ui
-│   ├── home       // 홈, 모임 관련 화면
-│   ├── place      // 한강공원 선택, 러닝코스 추천
-│   ├── meeting    // 모임 생성/상세
-│   ├── running    // 러닝 인증
-│   └── diet       // 식단 챌린지, 마이페이지
-└── MainActivity
+│   ├── auth                // SplashActivity, LoginActivity, SignupActivity
+│   │   └── util
+│   │       └── SessionManager.kt   // 로그인 세션 유지
+│   ├── home                // HomeActivity, MeetingAdapter
+│   ├── meeting              // CreateMeetingActivity, MeetingDetailActivity
+│   ├── place                // ParkSelectActivity, CourseListActivity 등
+│   ├── proof                // RunProofActivity (러닝 인증)
+│   ├── ranking               // RankingActivity
+│   └── privatejoin          // PrivateJoinActivity (비공개 모임 입장)
+├── MyPageActivity.kt         // ui 하위 패키지가 아닌 최상위 패키지에 위치
+├── ProfileSettingsActivity.kt
+├── PhotoGalleryActivity.kt
+└── CustomerServiceActivity.kt
 ```
 
 ---
@@ -130,6 +140,7 @@ git pull origin main
 
 ```bash
 git checkout feature/[본인담당]
+git pull origin main   # 최신 상태 반영 후 작업 시작
 ```
 
 ### 3. 작업 후 커밋 & push
