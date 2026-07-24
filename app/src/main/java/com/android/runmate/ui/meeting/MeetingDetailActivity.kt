@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -184,8 +185,8 @@ class MeetingDetailActivity : AppCompatActivity() {
                 btnJoin.setOnClickListener {
                     // 러닝 인증 화면(#7)으로 이동
                     val intent = Intent(this, com.android.runmate.ui.proof.RunProofActivity::class.java)
-                    intent.putExtra("meeting_id", meeting.id)
-                    intent.putExtra("meeting_name", meeting.title)
+                    intent.putExtra(com.android.runmate.ui.proof.RunProofActivity.EXTRA_MEETING_ID, meeting.id)
+                    intent.putExtra(com.android.runmate.ui.proof.RunProofActivity.EXTRA_MEETING_NAME, meeting.title)
                     startActivity(intent)
                 }
             }
@@ -206,20 +207,60 @@ class MeetingDetailActivity : AppCompatActivity() {
                 btnJoin.setBackgroundResource(R.drawable.bg_chip_selected)
                 btnJoin.setTextColor(getColor(R.color.surface_white))
                 btnJoin.setOnClickListener {
-                    AlertDialog.Builder(this)
-                        .setTitle("모임에 참여할까요?")
-                        .setMessage("'${meeting.title}'\n${formatRelativeDateTime(meeting.date, meeting.time)} · ${meeting.locationName}")
-                        .setPositiveButton("확인") { _, _ ->
-                            dbHelper.joinMeeting(meeting.id, DBHelper.CURRENT_USER_ID)
-                            Toast.makeText(this, "참여했어요!", Toast.LENGTH_SHORT).show()
-                            loadDetail()
-                        }
-                        .setNegativeButton("취소", null)
-                        .show()
+                    if (meeting.isPublic) {
+                        showJoinConfirmDialog(meeting)
+                    } else {
+                        showInviteCodeDialog(meeting)
+                    }
                 }
             }
         }
     }
+
+    /** 공개 모임: 그냥 확인만 하고 바로 참여 */
+    private fun showJoinConfirmDialog(meeting: MeetingDetail) {
+        AlertDialog.Builder(this)
+            .setTitle("모임에 참여할까요?")
+            .setMessage("'${meeting.title}'\n${formatRelativeDateTime(meeting.date, meeting.time)} · ${meeting.locationName}")
+            .setPositiveButton("확인") { _, _ ->
+                dbHelper.joinMeeting(meeting.id, DBHelper.CURRENT_USER_ID)
+                Toast.makeText(this, "참여했어요!", Toast.LENGTH_SHORT).show()
+                loadDetail()
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+
+    /** 비공개 모임: 호스트한테 받은 초대코드를 입력해야 참여 가능 (시안 #14) */
+    private fun showInviteCodeDialog(meeting: MeetingDetail) {
+        val etCode = EditText(this).apply {
+            hint = "초대코드 입력"
+            setPadding(dpToPx(20), dpToPx(16), dpToPx(20), dpToPx(16))
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("🔒 비공개 모임입니다")
+            .setMessage("호스트에게 받은 초대코드를 입력하면\n모임에 입장할 수 있어요")
+            .setView(etCode)
+            .setPositiveButton("입장하기") { _, _ ->
+                val inputCode = etCode.text.toString().trim()
+                if (inputCode.isEmpty()) {
+                    Toast.makeText(this, "초대코드를 입력해주세요", Toast.LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+                if (inputCode.equals(meeting.inviteCode, ignoreCase = true)) {
+                    dbHelper.joinMeeting(meeting.id, DBHelper.CURRENT_USER_ID)
+                    Toast.makeText(this, "참여했어요!", Toast.LENGTH_SHORT).show()
+                    loadDetail()
+                } else {
+                    Toast.makeText(this, "초대코드가 일치하지 않아요", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+
+    private fun dpToPx(dp: Int): Int = (dp * resources.displayMetrics.density).toInt()
 
     private fun bindParticipants(meeting: MeetingDetail) {
         val container = findViewById<LinearLayout>(R.id.layoutParticipants)

@@ -288,7 +288,7 @@ class DBHelper(context: Context) :
         val db = readableDatabase
         val query = """
             SELECT m.id, m.host_id, m.title, m.date, m.time, m.location_name, m.description,
-                   m.max_people, m.is_public, m.pace,
+                   m.max_people, m.is_public, m.invite_code, m.pace,
                    u.nickname AS host_nickname,
                    (SELECT COUNT(*) FROM meeting_participants p WHERE p.meeting_id = m.id) AS joined_count
             FROM meetings m
@@ -311,6 +311,7 @@ class DBHelper(context: Context) :
                     description = getString(getColumnIndexOrThrow("description")),
                     maxPeople = getInt(getColumnIndexOrThrow("max_people")),
                     isPublic = getInt(getColumnIndexOrThrow("is_public")) == 1,
+                    inviteCode = getString(getColumnIndexOrThrow("invite_code")),
                     joinedCount = getInt(getColumnIndexOrThrow("joined_count")),
                     pace = getString(getColumnIndexOrThrow("pace"))
                 )
@@ -454,5 +455,30 @@ class DBHelper(context: Context) :
         }
         cursor.close()
         return userId
+    }
+
+    /**
+     * 러닝 인증 저장: running_records 테이블에 기록을 추가합니다.
+     * 페이스/한줄소감은 현재 확정된 running_records 스키마(photo_path, distance, time, date)에
+     * 컬럼이 없어서 저장하지 않습니다. 필요하면 팀 확인 후 컬럼 추가하면 됩니다.
+     */
+    fun insertRunningRecord(
+        meetingId: Int,
+        userId: Int,
+        photoPath: String?,
+        distance: Double,
+        time: Double,
+        date: String
+    ): Long {
+        val db = writableDatabase
+        val values = android.content.ContentValues().apply {
+            put("meeting_id", meetingId)
+            put("user_id", userId)
+            put("photo_path", photoPath)
+            put("distance", distance)
+            put("time", time)
+            put("date", date)
+        }
+        return db.insert("running_records", null, values)
     }
 }

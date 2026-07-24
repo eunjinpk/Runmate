@@ -40,6 +40,9 @@ class CreateMeetingActivity : AppCompatActivity() {
     private lateinit var etTitle: EditText
     private lateinit var etLocation: EditText
     private lateinit var etInviteCode: EditText
+    private lateinit var tvInviteCodeLabel: TextView
+    private lateinit var layoutInviteCode: android.widget.LinearLayout
+    private lateinit var btnGenerateInviteCode: TextView
     private lateinit var etDescription: EditText
     private lateinit var btnPickDate: TextView
     private lateinit var btnPickTime: TextView
@@ -66,6 +69,12 @@ class CreateMeetingActivity : AppCompatActivity() {
         etTitle = findViewById(R.id.etTitle)
         etLocation = findViewById(R.id.etLocation)
         etInviteCode = findViewById(R.id.etInviteCode)
+        tvInviteCodeLabel = findViewById(R.id.tvInviteCodeLabel)
+        layoutInviteCode = findViewById(R.id.layoutInviteCode)
+        btnGenerateInviteCode = findViewById(R.id.btnGenerateInviteCode)
+        btnGenerateInviteCode.setOnClickListener {
+            etInviteCode.setText(generateInviteCode())
+        }
         etDescription = findViewById(R.id.etDescription)
         btnPickDate = findViewById(R.id.btnPickDate)
         btnPickTime = findViewById(R.id.btnPickTime)
@@ -166,14 +175,26 @@ class CreateMeetingActivity : AppCompatActivity() {
             btnPublic.setTextColor(getColor(R.color.surface_white))
             btnPrivate.setBackgroundResource(R.drawable.bg_chip_unselected)
             btnPrivate.setTextColor(getColor(R.color.text_primary))
-            etInviteCode.visibility = android.view.View.GONE
+            tvInviteCodeLabel.visibility = android.view.View.GONE
+            layoutInviteCode.visibility = android.view.View.GONE
         } else {
             btnPrivate.setBackgroundResource(R.drawable.bg_chip_selected)
             btnPrivate.setTextColor(getColor(R.color.surface_white))
             btnPublic.setBackgroundResource(R.drawable.bg_chip_unselected)
             btnPublic.setTextColor(getColor(R.color.text_primary))
-            etInviteCode.visibility = android.view.View.VISIBLE
+            tvInviteCodeLabel.visibility = android.view.View.VISIBLE
+            layoutInviteCode.visibility = android.view.View.VISIBLE
+            // 처음 비공개로 바꿀 때만 자동 생성 (이미 코드가 있으면 안 덮어씀)
+            if (etInviteCode.text.isNullOrBlank()) {
+                etInviteCode.setText(generateInviteCode())
+            }
         }
+    }
+
+    /** 영문 대문자 + 숫자 조합 6자리 랜덤 초대코드 생성 */
+    private fun generateInviteCode(): String {
+        val pool = ('A'..'Z') + ('0'..'9')
+        return (1..6).map { pool.random() }.joinToString("")
     }
 
     private fun submit() {

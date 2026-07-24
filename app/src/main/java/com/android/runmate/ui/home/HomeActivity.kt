@@ -1,6 +1,5 @@
 package com.android.runmate.ui.home
 
-import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -16,7 +15,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.android.runmate.R
 import com.android.runmate.data.DBHelper
-import com.android.runmate.ui.ranking.RankingActivity
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 
 /**
@@ -174,12 +172,7 @@ class HomeActivity : AppCompatActivity() {
             )
         }
         findViewById<LinearLayout>(R.id.navRanking).setOnClickListener {
-            startActivity(
-                android.content.Intent(
-                    this,
-                    com.android.runmate.ui.ranking.RankingActivity::class.java
-                )
-            )
+            startActivity(android.content.Intent(this, com.android.runmate.ui.ranking.RankingActivity::class.java))
         }
         findViewById<LinearLayout>(R.id.navMy).setOnClickListener {
             // MyPageActicity는 com.android.runmate 최상위 패키지에 있음 (MainActivity랑 같은 위치)
