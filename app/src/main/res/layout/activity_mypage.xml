@@ -265,12 +265,26 @@
                     android:layout_marginTop="12dp"
                     android:visibility="gone" />
 
+                <!-- 러닝인증하기: 참여한 모임 중 골라서 바로 인증 화면으로 -->
+                <TextView
+                    android:id="@+id/btnRunProofDirect"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="28dp"
+                    android:background="@drawable/bg_chip_selected"
+                    android:gravity="center"
+                    android:padding="14dp"
+                    android:text="🏃 러닝인증하기"
+                    android:textColor="@color/surface_white"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
                 <!-- 로그아웃 -->
                 <TextView
                     android:id="@+id/btnLogout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginTop="12dp"
                     android:background="@drawable/bg_stat_card"
                     android:gravity="center"
                     android:padding="14dp"

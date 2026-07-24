@@ -53,9 +53,38 @@ class MyPageActivity : AppCompatActivity() {
             startActivity(Intent(this, com.android.runmate.ui.ranking.RankingActivity::class.java))
         }
 
+        findViewById<TextView>(R.id.btnRunProofDirect).setOnClickListener {
+            openRunProofPicker()
+        }
+
         findViewById<TextView>(R.id.btnLogout).setOnClickListener {
             logout()
         }
+    }
+
+    /** 참여한 모임 중 어느 모임 러닝을 인증할지 골라서 RunProofActivity로 이동 */
+    private fun openRunProofPicker() {
+        val dbHelper = DBHelper(this)
+        val joinedMeetings = dbHelper.getJoinedMeetingsForUser(currentUserId)
+
+        if (joinedMeetings.isEmpty()) {
+            android.widget.Toast.makeText(this, "참여한 모임이 없어요. 먼저 모임에 참여해주세요!", android.widget.Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val titles = joinedMeetings.map { it.second }.toTypedArray()
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("어느 러닝을 인증할까요?")
+            .setItems(titles) { _, index ->
+                val (meetingId, meetingTitle) = joinedMeetings[index]
+                val intent = Intent(this, com.android.runmate.ui.proof.RunProofActivity::class.java)
+                intent.putExtra(com.android.runmate.ui.proof.RunProofActivity.EXTRA_MEETING_ID, meetingId)
+                intent.putExtra(com.android.runmate.ui.proof.RunProofActivity.EXTRA_MEETING_NAME, meetingTitle)
+                startActivity(intent)
+            }
+            .setNegativeButton("취소", null)
+            .show()
     }
 
     override fun onResume() {
