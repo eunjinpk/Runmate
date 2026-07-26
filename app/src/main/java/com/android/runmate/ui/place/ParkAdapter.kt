@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.android.runmate.R
 import com.android.runmate.data.HanRiverPark
@@ -45,7 +46,7 @@ class ParkAdapter(
             if (park.isFavorite) R.drawable.ic_heart_filled else R.drawable.ic_heart_empty
         )
 
-        val blue = Color.parseColor("#2196F3")
+        val blue = ContextCompat.getColor(holder.view.context, R.color.run_blue)
         val darkText = Color.parseColor("#212121")
         val grayText = Color.parseColor("#9E9E9E")
 

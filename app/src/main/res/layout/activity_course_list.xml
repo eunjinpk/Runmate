@@ -48,7 +48,7 @@
                     android:layout_height="16dp"
                     android:layout_marginEnd="4dp"
                     android:src="@drawable/ic_location_pin"
-                    app:tint="#2196F3" />
+                    app:tint="@color/run_blue" />
 
                 <TextView
                     android:id="@+id/tvParkTitle"
@@ -89,7 +89,7 @@
         android:textSize="16sp"
         android:textStyle="bold"
         android:text="이 코스로 모임 만들기"
-        app:backgroundTint="#2196F3"
+        app:backgroundTint="@color/run_blue"
         app:cornerRadius="14dp" />
 
 </LinearLayout>

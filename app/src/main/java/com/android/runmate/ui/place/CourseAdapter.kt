@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.android.runmate.R
 import com.android.runmate.data.RunningCourse
@@ -50,11 +51,12 @@ class CourseAdapter(
 
         holder.view.findViewById<TextView>(R.id.tvCourseTitle).text = course.title
 
+        val blue = ContextCompat.getColor(holder.view.context, R.color.run_blue)
         val distanceText = "${course.distanceKm}km"
         val numberLength = "${course.distanceKm}".length
         val spannable = SpannableString(distanceText)
         spannable.setSpan(
-            ForegroundColorSpan(Color.parseColor("#2196F3")),
+            ForegroundColorSpan(blue),
             0, numberLength,
             android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
         )
@@ -69,7 +71,7 @@ class CourseAdapter(
 
         val card = holder.view.findViewById<MaterialCardView>(R.id.cardCourse)
         if (isSelected) {
-            card.strokeColor = Color.parseColor("#2196F3")
+            card.strokeColor = blue
             card.strokeWidth = 4
             card.setCardBackgroundColor(Color.parseColor("#F0F7FF"))
         } else {

@@ -46,7 +46,7 @@
             android:layout_marginStart="34dp"
             android:text="서울 11개 한강공원 중에서 골라보세요"
             android:textSize="13sp"
-            android:textColor="#E3F2FD" />
+            android:textColor="@color/run_sky" />
     </LinearLayout>
 
     <LinearLayout
@@ -143,7 +143,7 @@
         android:textSize="16sp"
         android:textStyle="bold"
         android:text="코스 보기"
-        app:backgroundTint="#2196F3"
+        app:backgroundTint="@color/run_blue"
         app:cornerRadius="14dp" />
 
 </LinearLayout>

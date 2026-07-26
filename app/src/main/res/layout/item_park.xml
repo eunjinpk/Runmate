@@ -47,7 +47,7 @@
                 android:layout_height="14dp"
                 android:layout_marginEnd="4dp"
                 android:src="@drawable/ic_location_pin"
-                app:tint="#2196F3" />
+                app:tint="@color/run_blue" />
 
             <TextView
                 android:id="@+id/tvParkName"
